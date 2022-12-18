@@ -1,7 +1,4 @@
 import 'package:circle/phone_login/phone_login.dart';
-import 'package:circle/screens/buttons_screens/circle_buttons_screens.dart';
-import 'package:circle/screens/buttons_screens/profile_buttons_screen.dart';
-import 'package:circle/screens/other_user_profile.dart';
 import 'package:circle/screens/chat_core/enter_name_screen.dart';
 import 'package:circle/screens/join_group_info.dart';
 import 'package:circle/screens/main_circle_modified.dart';

@@ -6,6 +6,7 @@ import 'package:circle/screens/buttons_screens/text_buttons_screens.dart';
 import 'package:circle/screens/chat_core/search_chat_screen.dart';
 import 'package:circle/screens/chat_core/search_users.dart';
 import 'package:circle/screens/chat_core/users.dart';
+import 'package:circle/screens/new_chat_screen.dart';
 import 'package:circle/screens/view_circle_page.dart';
 import 'package:circle/userinfo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -374,7 +375,7 @@ class MainCircleState extends State<MainCircle> {
                       ElevatedButton(
                         child: const Text("TEXT"),
                         onPressed: () {
-                          Get.to(TextButtonsScreen());
+                          Get.to(()=>NewChatTabsScreen());
                           // viewMyCircles(context);
                         },
                         style: ElevatedButton.styleFrom(

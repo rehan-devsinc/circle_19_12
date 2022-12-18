@@ -1,13 +1,16 @@
 import 'package:circle/screens/Create_Circle_screen.dart';
 import 'package:circle/screens/chat_core/search_chat_screen.dart';
 import 'package:circle/screens/chat_core/search_users.dart';
-import 'package:circle/screens/chat_core/users.dart';
+import 'package:circle/screens/search_contacts_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:get/get.dart';
+import '../phone_contacts_controller.dart';
+import '../widgets/phone_contact_tile.dart';
 import 'calendar_list_events.dart';
 import 'chat_core/chat.dart';
 import 'chat_core/util.dart';
@@ -17,6 +20,9 @@ import 'other_user_profile.dart';
 class NewChatTabsScreen extends StatelessWidget {
   NewChatTabsScreen({Key? key}) : super(key: key);
 
+  bool permissionGranted = false;
+  PhoneContactsController phoneContactsController = PhoneContactsController();
+  bool contactsFetched = false;
 
 
   int selectedTab = 0;
@@ -25,7 +31,7 @@ class NewChatTabsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTabController(
       initialIndex: 0,
-      length: 3,
+      length: 4,
       child: Builder(
         builder: (context) {
           return Scaffold(
@@ -37,7 +43,7 @@ class NewChatTabsScreen extends StatelessWidget {
                   onTap: (){
                     Get.back();
                   },
-                  child: Icon(Icons.arrow_back, color: Colors.black,)),
+                  child: const Icon(Icons.arrow_back, color: Colors.black,)),
               actions: [
                 Padding(
                   padding: const EdgeInsets.only(right: 16.0),
@@ -50,6 +56,18 @@ class NewChatTabsScreen extends StatelessWidget {
                           Get.to(()=>const SearchChatScreen());
 
                         }
+                        else if (DefaultTabController.of(context)!.index == 2){
+
+                          if(contactsFetched) {
+                          Get.to(() => SearchContactsScreen(
+                              phoneContactsController:
+                                  phoneContactsController));
+                        }
+                          else{
+                            Get.snackbar("Processing", "Please try again after contacts are fetched successfully");
+                          }
+                      }
+
                         else{
                           Get.to(()=>const SearchUsersScreen(onlyFriends: true,));
 
@@ -78,7 +96,7 @@ class NewChatTabsScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 0),
                   child: SizedBox(
-                    width: Get.width*0.75,
+                    width: Get.width,
                     child: TabBar(
 
                       onTap: (index){
@@ -87,14 +105,17 @@ class NewChatTabsScreen extends StatelessWidget {
 
                       },
                       indicatorPadding: EdgeInsets.only(top: 40),
-                        tabs: [
+                        tabs: const [
                       Tab(
                         child: Text("Users", style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
                       ),
                       Tab(
                         child: Text("Circles", style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold)),
                       ),
-                      Tab(
+                          Tab(
+                            child: Text("Contacts", style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+                          ),
+                          Tab(
                         child: Text("Friends", style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold)),
                       ),
 
@@ -108,8 +129,8 @@ class NewChatTabsScreen extends StatelessWidget {
                 [
                   _buildUsersTabBody(),
                   _buildCirclesTabBody(),
+                  _buildContactsTabBody(),
                   _buildFriendsTabBody(),
-
                 ]
                 )
                 )
@@ -436,6 +457,66 @@ class NewChatTabsScreen extends StatelessWidget {
     );
   }
 
+  _buildContactsTabBody(){
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0, right: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: const [
+              Text("Contacts"),
+              //   Spacer(),
+              //   InkWell(
+              //       onTap: (){
+              //         Get.to(()=>CreateCirclePage());
+              //       },
+              //       child: Icon(Icons.add_circle_outlined,color: Colors.black, ))
+            ],
+          ),
+          const Divider(
+            color: Colors.grey,
+            thickness: 1.5,
+          ),
+          Expanded(
+              child: FutureBuilder(
+                  future: fetchContacts(),
+                  builder: (context,AsyncSnapshot<List<Contact>> snapshot) {
+
+                    if(snapshot.connectionState==ConnectionState.waiting || (!(snapshot.hasData))){
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    if ((!(snapshot.connectionState==ConnectionState.waiting )) && (!permissionGranted)){
+                      return const Center(
+                        child: Text("Permission Not Granted"),
+                      );
+                    }
+
+                    List<Contact> contacts = snapshot.data ?? [];
+
+                    return ListView.builder(
+                        itemCount: contacts.length,
+                        itemBuilder: (context, index){
+
+                          if(index < phoneContactsController.savedUsers.length){
+                            return PhoneContactTile(contact: phoneContactsController.savedContacts[index], user: phoneContactsController.savedUsers[index] );
+                          }
+
+                          return PhoneContactTile(contact: contacts[index],);
+                        }
+                    );
+                  }
+              )          )
+          // Text("Circles"),
+          // Text("Friends"),
+        ],
+      ),
+    );
+  }
+
 
 
   Widget _buildAvatar(types.User user) {
@@ -480,6 +561,23 @@ class NewChatTabsScreen extends StatelessWidget {
       ),
     );
   }
+
+  Future<List<Contact>> fetchContacts() async{
+    if(contactsFetched){
+      return phoneContactsController.allContacts;
+    }
+
+    permissionGranted = await FlutterContacts.requestPermission();
+    if (permissionGranted) {
+      phoneContactsController.allContacts = await FlutterContacts.getContacts(withPhoto: true, withProperties: true);
+    }
+
+    await phoneContactsController.getSavedCircleUsers();
+
+    contactsFetched = true;
+    return phoneContactsController.allContacts;
+  }
+
 
 }
 
