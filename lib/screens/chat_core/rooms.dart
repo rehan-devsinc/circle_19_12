@@ -59,7 +59,7 @@ class _RoomsPageState extends State<RoomsPage> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.lightBlue,
+      // backgroundColor: Colors.lightBlue,
       appBar: (!widget.secondVersion) ? AppBar(
         actions: [
           IconButton(
@@ -224,7 +224,7 @@ class _RoomsPageState extends State<RoomsPage> {
                                             Text(
                                               room.metadata?['status'] ?? ' status',
                                               style: const TextStyle(
-                                                  color: Colors.white,
+                                                  color: Colors.black,
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.normal,
                                                 fontStyle: FontStyle.italic
@@ -233,7 +233,7 @@ class _RoomsPageState extends State<RoomsPage> {
                                             Text(
                                               room.metadata?['privacy'] ?? 'undefined',
                                               style: const TextStyle(
-                                                  color: Colors.white,
+                                                  color: Colors.black,
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.normal,
                                                   fontStyle: FontStyle.italic
@@ -245,7 +245,7 @@ class _RoomsPageState extends State<RoomsPage> {
                                         Text(
                                           room.name ?? 'no name',
                                           style: const TextStyle(
-                                              color: Colors.white,
+                                              color: Colors.black,
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold),
                                         ),
@@ -263,19 +263,19 @@ class _RoomsPageState extends State<RoomsPage> {
                                                   return const Text(
                                                     "Loading",
                                                     style: TextStyle(
-                                                        color: Colors.white),
+                                                        color: Colors.black),
                                                   );
                                                 }
 
                                                 return Text(
                                                   snapshot.data!,
                                                   style:
-                                                      TextStyle(color: Colors.white),
+                                                      TextStyle(color: Colors.black),
                                                 );
                                               },
                                             ),
                                             const Spacer(),
-                                            muted ? const Icon(CupertinoIcons.bell_slash_fill, color: Colors.white,) : SizedBox()
+                                            muted ? const Icon(CupertinoIcons.bell_slash_fill, color: Colors.black,) : SizedBox()
                                           ],
                                         )
                                       ],
@@ -381,7 +381,7 @@ class _RoomsPageState extends State<RoomsPage> {
         child: !hasImage
             ? Text(
                 name.isEmpty ? '' : name[0].toUpperCase(),
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.black),
               )
             : null,
       ),
