@@ -12,8 +12,12 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../userinfo.dart';
+import '../google_maps_screen.dart';
 import '../main_circle_modified.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
@@ -118,7 +122,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                     types.RoomType.group,
                               ));
                         },
-                        child: Icon(
+                        child: const Icon(
                           Icons.message,
                           color: Colors.white,
                         )),
@@ -276,7 +280,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         child: const Text("Copy Invite Link")),
 
                     MuteButton(groupRoom: widget.groupRoom),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     Row(
@@ -620,7 +624,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                               builder: (context,
                                   AsyncSnapshot<types.Room> snapshot) {
                                 if (!snapshot.hasData) {
-                                  return SizedBox(
+                                  return const SizedBox(
                                     height: 40,
                                     child:
                                         Center(child: Text("No Users to show")),
@@ -629,47 +633,67 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
-                                  return SizedBox(
+                                  return const SizedBox(
                                     height: 40,
                                     child: Center(
                                         child: Text("Loading Users to show")),
                                   );
                                 }
 
-                                return ListView.builder(
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    itemCount: snapshot.data!.users.length + 1,
-                                    itemBuilder: (context, index) {
-                                      if (index == 0) {
-                                        return Padding(
-                                          padding: const EdgeInsets.only(
-                                              bottom: 12.0),
-                                          child: Text(
-                                            "${snapshot.data!.users.length} Participants",
-                                            style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        );
+                                return Column(
+                                  children: [
+                                    ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        itemCount: snapshot.data!.users.length + 1,
+                                        itemBuilder: (context, index) {
+                                          if (index == 0) {
+                                            return Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 12.0),
+                                              child: Text(
+                                                "${snapshot.data!.users.length} Participants",
+                                                style: const TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold),
+                                              ),
+                                            );
+                                          }
+
+                                          types.User user =
+                                              snapshot.data!.users[index - 1];
+
+                                          List managers = (widget.groupRoom
+                                                  .metadata)?["managers"] ??
+                                              [];
+                                          managers = managers
+                                              .map((e) => e.toString())
+                                              .toList();
+
+                                          return SingleUserTile(
+                                            user: user,
+                                            groupRoom: widget.groupRoom,
+                                            manager: managers.contains(user.id),
+                                          );
+                                        }),
+                                    const SizedBox(height: 20,),
+                                    Obx(() => ElevatedButton(onPressed: (){
+                                      if(snapshot.hasData){
+
+                                        _onLocationPressed(snapshot.data!.users);
                                       }
 
-                                      types.User user =
-                                          snapshot.data!.users[index - 1];
+                                    },
+                                child: groupInfoController.locationLoading.value ? const CircularProgressIndicator(
+                                color: Colors.white,
+                                ) : const Text("View Users Location"),
+                                      style: ElevatedButton.styleFrom(
+                                          fixedSize: const Size(210, 40),
+                                          backgroundColor:  Colors.pink),
+                                    )),
 
-                                      List managers = (widget.groupRoom
-                                              .metadata)?["managers"] ??
-                                          [];
-                                      managers = managers
-                                          .map((e) => e.toString())
-                                          .toList();
-
-                                      return SingleUserTile(
-                                        user: user,
-                                        groupRoom: widget.groupRoom,
-                                        manager: managers.contains(user.id),
-                                      );
-                                    });
+                                  ],
+                                );
                               });
                         }),
                   ],
@@ -770,6 +794,64 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
 
     groupInfoController.loading.value = false;
   }
+
+  Future<void> _onLocationPressed(List<types.User> users) async {
+
+    List<types.User> updatedUsers = List.castFrom(users);
+    groupInfoController.locationLoading.value = true;
+
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      Get.snackbar("Request Failed", "Enable service Location");
+      groupInfoController.locationLoading.value = false;
+
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+
+        Get.snackbar("Request Failed", "Location permission denied", backgroundColor: Colors.white);
+        groupInfoController.locationLoading.value = false;
+
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+
+      Get.snackbar("Request Failed",
+          "Location permissions are permanently denied, we cannot request permissions. Enable from app settings",backgroundColor: Colors.white);
+
+      groupInfoController.locationLoading.value = false;
+
+      return;
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    Position position = await Geolocator.getCurrentPosition();
+    await CurrentUserInfo.getCurrentUserMapFresh();
+    updatedUsers.removeWhere((element) => element.id==FirebaseAuth.instance.currentUser!.uid);
+    groupInfoController.locationLoading.value = false;
+    Get.to(() => GoogleMapScreen(myCurrentPosition: position, users: users, ));
+  }
+
 }
 
 class MuteButton extends StatefulWidget {

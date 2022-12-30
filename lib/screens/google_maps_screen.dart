@@ -7,7 +7,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:custom_map_markers/custom_map_markers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -18,9 +20,14 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 
+import '../gmaps_screen_controller.dart';
+
 class GoogleMapScreen extends StatefulWidget {
-  GoogleMapScreen({Key? key, required this.currentPosition}) : super(key: key);
-  final Position currentPosition;
+  const GoogleMapScreen({Key? key, required this.myCurrentPosition,  this.users, this.userSelected=false, this.preferredPosition}) : super(key: key);
+  final Position myCurrentPosition;
+  final List<types.User>? users;
+  final bool userSelected;
+  final LatLng? preferredPosition;
 
   @override
   State<GoogleMapScreen> createState() => _GoogleMapScreenState();
@@ -29,6 +36,11 @@ class GoogleMapScreen extends StatefulWidget {
 class _GoogleMapScreenState extends State<GoogleMapScreen> {
   final List<MarkerData> markers = [];
   final List<Polyline> _polylines = [];
+  List<types.User> _users = [];
+
+  late GoogleMapsScreenController controller;
+
+  GoogleMapController? googleMapController;
 
   ///gotcha key
   // String key = "AIzaSyCWsGrUuzgLzaLQVsS5g6Q-lfOhiz96NcY";
@@ -38,6 +50,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
 
   @override
   void initState() {
+    controller = GoogleMapsScreenController(firstUserSelected: widget.userSelected);
     // TODO: implement initState
 
      shareLocation();
@@ -46,57 +59,125 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
   }
 
   Future<void> shareLocation() async{
-    await FirebaseFirestore.instance.collection('Locations').doc(FirebaseAuth.instance.currentUser!.uid).set(
-      UserLocationAndImage(lat: widget.currentPosition.latitude, lng: widget.currentPosition.longitude, imgUrl: CurrentUserInfo.userMap!['imageUrl']).toMap()
+    Map userMap = CurrentUserInfo.userMap ?? (await CurrentUserInfo.getCurrentUserMapFresh());
+    Map userMetadata = userMap['metadata'] ?? {};
+    userMetadata['locationSharing'] = true;
+    userMetadata['Position'] = {
+      'lat' : widget.myCurrentPosition.latitude,
+      'long' : widget.myCurrentPosition.longitude
+    };
+
+    FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).update({'metadata' : userMetadata}
     );
   }
 
-  final Completer<GoogleMapController> _controller = Completer();
 
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
       appBar: AppBar(
-        title: const Text("My Location"),
+        title: const Text("Users Location"),
       ),
       body: FutureBuilder(
-        future: getAllMarkers(),
+        future: getAllMarkersAndUsers(),
         builder: (context,AsyncSnapshot<List<MarkerData>> snapshot) {
 
           if(!snapshot.hasData || snapshot.connectionState==ConnectionState.waiting){
             return Center(child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(
+              children:  [
+                const CircularProgressIndicator(
                   color: Colors.teal,
                 ),
-                SizedBox(height: 10,),
-                Text("Fetching available users locations")
+                const SizedBox(height: 10,),
+                Text(widget.users != null ? "Fetching Location" : "Fetching available users locations")
               ],
             ));
           }
 
-          return CustomGoogleMapMarkerBuilder(
-            // screenshotDelay: Duration(seconds: 1),
-            customMarkers: snapshot.data!,
-            builder: (BuildContext context, Set<Marker>? markers) {
-              if(markers==null || markers.isEmpty){
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              return GoogleMap(
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(widget.currentPosition.latitude, widget.currentPosition.longitude),
-                  zoom: 14.4746,
+          return SizedBox(
+            child: Stack(
+              children: [
+                CustomGoogleMapMarkerBuilder(
+                  // screenshotDelay: Duration(seconds: 1),
+                  customMarkers: snapshot.data!,
+                  builder: (BuildContext context, Set<Marker>? markers) {
+                    if(markers==null || markers.isEmpty){
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    return GoogleMap(
+
+                      // myLocationButtonEnabled: true,
+                   // myLocationEnabled: true,
+                    zoomControlsEnabled: false,
+
+                    initialCameraPosition: CameraPosition(
+                    target: (widget.preferredPosition!=null) ? LatLng(widget.preferredPosition!.latitude, widget.preferredPosition!.longitude) : LatLng(widget.myCurrentPosition.latitude, widget.myCurrentPosition.longitude),
+                    zoom: 19,
+                    ),
+                    markers: markers ?? {},
+                    polylines: _polylines.toSet(),
+                    onMapCreated: (GoogleMapController controller) {
+                      googleMapController = controller;
+                    },
+                    );
+                  },
                 ),
-                markers: markers ?? {},
-                polylines: _polylines.toSet(),
-                onMapCreated: (GoogleMapController controller) { },
-              );
-            },
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  child: SizedBox(
+                    height: 140,
+                    width: Get.width,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                          color: Colors.white,
+
+                          borderRadius: BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20) )
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+                      width: Get.width,
+                      child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _users.length,
+                          itemBuilder: (context,index){
+                            types.User _user = _users[index];
+                            Map metadata = _user.metadata ?? {};
+                            LatLng? latLng;
+                            Map positionMap = metadata['Position'] ?? {};
+                            if((positionMap['lat']!=null) && (positionMap['long']!=null) ){
+                              latLng = LatLng(positionMap['lat'], positionMap['long']);
+                            }
+
+                            return Obx(() => Padding(
+                              padding: EdgeInsets.only(left: index== 0 ? 20.0 : 0, right: index==(_users.length-1) ? 20 : 0),
+                              child: buildUserAvatar(_users[index],
+                                  selected: index==(controller.selectedIndex.value),
+                                  index: index,
+                                  enabled: (metadata['locationSharing'] ?? false),
+                              latlng: latLng
+                              ),
+                            ));
+                          }),
+                    ),
+                  ),
+                ),
+
+              ],
+            ),
           );
         }
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: (){
+          if(googleMapController!=null){
+            googleMapController!.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(widget.myCurrentPosition.latitude, widget.myCurrentPosition.longitude,),zoom: 12)));
+
+          }
+        },
+        child: const Icon(Icons.my_location_outlined),
       ),
     );
   }
@@ -147,7 +228,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
   Future<List<Polyline>> _setPolyline() async{
 
     print("into set polylines");
-    Map directions =  await getDirections(LatLng(widget.currentPosition.latitude, widget.currentPosition.longitude), LatLng(widget.currentPosition.latitude+0.5, widget.currentPosition.longitude+0.5));
+    Map directions =  await getDirections(LatLng(widget.myCurrentPosition.latitude, widget.myCurrentPosition.longitude), LatLng(widget.myCurrentPosition.latitude+0.5, widget.myCurrentPosition.longitude+0.5));
 
     List<PointLatLng> points = directions['polyline_decoded'];
 
@@ -162,6 +243,81 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
     return _polylines;
   }
 
+  Widget buildUserAvatar(types.User user, {bool selected = false, required int index, required bool enabled, LatLng? latlng}){
+
+    return InkWell(
+      onTap: enabled ? (){
+        controller.selectedIndex.value = index;
+        googleMapController!.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(latlng!.latitude, latlng.longitude),zoom: 10)));
+      } : null,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 15.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  child: CircleAvatar(
+
+                    backgroundImage: NetworkImage(user.imageUrl!, ) ,
+                    radius: 30,
+                    foregroundColor: Colors.grey,
+
+                  ),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color:  (selected && (enabled)) ? Colors.orange : Colors.transparent,
+                      width: 5
+                    )
+                  ),
+                ),
+                // const Positioned(
+                //     top: 0,
+                //     right: 0,
+                //     child: Icon(Icons.close, color: Colors.red, size: 30,))
+              ],
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(user.firstName ?? "no first name", style:  TextStyle(fontWeight: FontWeight.bold, color: enabled ? null :  Colors.grey), ),
+                // SizedBox(width: 4,),
+                enabled ? const SizedBox() : const Icon(Icons.close, size: 15, color: Colors.red,)
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+
+  }
+
+  List<types.User> rearrangeUsers(List<types.User> users){
+    List<types.User> allUsers = List.from(users);
+    List<types.User> arrangedUsers = [];
+    print("users length: ${allUsers.length}");
+
+    for (var user in users){
+
+      print("loop started for user ${user.firstName}");
+      // print("username : ${user.firstName}");
+      Map metadata = user.metadata ?? {};
+      if (metadata['locationSharing'] ?? false){
+        allUsers.removeWhere((u)=>(u.id==user.id));
+        arrangedUsers.add(user);
+      }
+      print("all users length: ${allUsers.length}");
+      print("loop completed for user ${user.firstName}");
+    }
+
+    arrangedUsers.addAll(allUsers);
+    print("returning arranged users");
+    return arrangedUsers;
+  }
+
   Future<Uint8List> getNetworkImageBytes(String imgUrl) async{
     http.Response response = await http.get(
       Uri.parse(imgUrl)
@@ -169,20 +325,58 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
     return response.bodyBytes;
   }
 
-  Future<List<MarkerData>> getAllMarkers() async{
+  Future<List<MarkerData>> getAllMarkersAndUsers() async{
+
+    // return markers;
+
     markers.clear();
-    List<UserLocationAndImage> locations = [];
 
-    QuerySnapshot<Map<String,dynamic>> querySnapshot = await FirebaseFirestore.instance.collection('Locations').get();
+    _users.clear();
 
-    querySnapshot.docs.removeWhere((element) => element.id==FirebaseAuth.instance.currentUser!.uid);
-
-    for (var doc in querySnapshot.docs) {
-      locations.add(UserLocationAndImage.fromMap(doc.data()));
+    if(widget.users!=null){
+      _users = widget.users!;
+    }
+    else
+    {
+      _users = (await FirebaseChatCore.instance.users().first);
     }
 
-    locations.add(UserLocationAndImage(lat: widget.currentPosition.latitude, lng: widget.currentPosition.longitude, imgUrl: CurrentUserInfo.userMap!['imageUrl']));
 
+    if(_users.isEmpty){
+      print("users are empty");
+    }
+
+    print("hi");
+
+    _users = rearrangeUsers(_users);
+
+    List<UserLocationAndImage> locations = [];
+
+    print("users length: ${_users.length}");
+    for (var user in _users) {
+      print("user name: ${user.firstName}");
+
+      Map metadata = user.metadata ?? {};
+      if(metadata['locationSharing'] ?? false) {
+        Map position = metadata['Position'];
+        // print()
+        UserLocationAndImage userLocationAndImage =
+            UserLocationAndImage(lat: position['lat'], lng: position['long'], imgUrl: user.imageUrl!);
+        locations.add(userLocationAndImage);
+
+      }
+
+
+      print("loop completed");
+
+
+
+    }
+
+    print("bye");
+
+
+    locations.add(UserLocationAndImage(lat: widget.myCurrentPosition.latitude, lng: widget.myCurrentPosition.longitude, imgUrl: CurrentUserInfo.userMap!['imageUrl']));
 
     for (var element in locations) {
 
@@ -213,6 +407,8 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
           ),
       );
     }
+
+    print("returning");
 
 
     return markers;

@@ -350,7 +350,7 @@ class _RoomsPageState extends State<RoomsPage> {
   void logout() async {
     await FirebaseAuth.instance.signOut();
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context){
-      return PhoneLoginScreen();
+      return const PhoneLoginScreen();
     }));
   }
 

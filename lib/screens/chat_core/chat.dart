@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:circle/screens/chat_core/group_info.dart';
+import 'package:circle/screens/other_user_profile.dart';
 import 'package:circle/userinfo.dart';
 import 'package:circle/utils/db_operations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -78,24 +79,29 @@ class _ChatPageState extends State<ChatPage> {
         backgroundColor: Colors.white,
         systemOverlayStyle: SystemUiOverlayStyle.light,
         title: (!(widget.room.type==(types.RoomType.group)))
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: Image.network(
-                        otherUser!.imageUrl ??
-                            "https://media.istockphoto.com/vectors/user-avatar-profile-icon-black-vector-illustration-vector-id1209654046?k=20&m=1209654046&s=612x612&w=0&h=Atw7VdjWG8KgyST8AXXJdmBkzn0lvgqyWod9vTb2XoE=",
-                        width: 40,
-                        height: 40,
-                      )),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  Text(otherUser!.firstName!, style: TextStyle(color: Colors.black),)
-                  // Text(title),
-                ],
-              )
+            ? InkWell(
+          onTap: (){
+            Get.to(()=>OtherUserProfileScreen(otherUser: otherUser!));
+          },
+              child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ClipRRect(
+                        borderRadius: BorderRadius.circular(50),
+                        child: Image.network(
+                          otherUser!.imageUrl ??
+                              "https://media.istockphoto.com/vectors/user-avatar-profile-icon-black-vector-illustration-vector-id1209654046?k=20&m=1209654046&s=612x612&w=0&h=Atw7VdjWG8KgyST8AXXJdmBkzn0lvgqyWod9vTb2XoE=",
+                          width: 40,
+                          height: 40,
+                        )),
+                    const SizedBox(
+                      width: 20,
+                    ),
+                    Text(otherUser!.firstName!, style: TextStyle(color: Colors.black),)
+                    // Text(title),
+                  ],
+                ),
+            )
             :
 
             ///GROUP APP BAR

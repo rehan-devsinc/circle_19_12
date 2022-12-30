@@ -2,7 +2,6 @@ import 'package:circle/logoutController.dart';
 import 'package:circle/phone_login/phone_login.dart';
 import 'package:circle/screens/buttons_screens/circle_buttons_screens.dart';
 import 'package:circle/screens/buttons_screens/event_buttons_screens.dart';
-import 'package:circle/screens/buttons_screens/text_buttons_screens.dart';
 import 'package:circle/screens/chat_core/search_chat_screen.dart';
 import 'package:circle/screens/chat_core/search_users.dart';
 import 'package:circle/screens/chat_core/users.dart';
@@ -20,10 +19,12 @@ import 'package:get/get.dart';
 import '../notification_service/local_notification_service.dart';
 import '../utils/db_operations.dart';
 import '../utils/new_user_config.dart';
+import '../widgets/LocationSharingWidget.dart';
 import 'buttons_screens/profile_buttons_screen.dart';
 import 'chat_core/rooms.dart';
 import 'chat_core/view_requests_page.dart';
 import 'google_maps_screen.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 
 class MainCircle extends StatefulWidget {
   const MainCircle({Key? key}) : super(key: key);
@@ -149,6 +150,8 @@ class MainCircleState extends State<MainCircle> {
         NewUserConfigurations().setupUserScheduledInvites();
       }
     }
+
+    CurrentUserInfo.getCurrentUserMapFresh();
   }
 
   int _currentIndex = 0;
@@ -160,10 +163,10 @@ class MainCircleState extends State<MainCircle> {
 
   @override
   Widget build(BuildContext context) {
-    print(FirebaseAuth.instance.currentUser!.metadata.creationTime);
-    print(FirebaseAuth.instance.currentUser!.metadata.lastSignInTime);
-
-    print(FirebaseAuth.instance.currentUser!.uid);
+    // print(FirebaseAuth.instance.currentUser!.metadata.creationTime);
+    // print(FirebaseAuth.instance.currentUser!.metadata.lastSignInTime);
+    //
+    // print(FirebaseAuth.instance.currentUser!.uid);
     // print(FirebaseChatCore.instance.firebaseUser);
 
     // TODO: implement build
@@ -368,83 +371,91 @@ class MainCircleState extends State<MainCircle> {
               : Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
-                    children: <Widget>[
-                      SizedBox(
-                        height: 100,
-                      ),
-                      ElevatedButton(
-                        child: const Text("TEXT"),
-                        onPressed: () {
-                          Get.to(()=>NewChatTabsScreen());
-                          // viewMyCircles(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          fixedSize: Size(80, 80),
-                          shape: CircleBorder(),
+                    children: [
+                      const SizedBox(height: 25,),
+                      const LocationSharingWidget(),
+
+
+                      Expanded(
+                        child: Column(
+                          children: <Widget>[
+                            const SizedBox(height: 100,),
+                            ElevatedButton(
+                              child: const Text("TEXT"),
+                              onPressed: () {
+                                Get.to(()=>NewChatTabsScreen());
+                                // viewMyCircles(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                fixedSize: const Size(80, 80),
+                                shape: const CircleBorder(),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                ElevatedButton(
+
+                                    ///VIEW CIRCLE INVITES REPLACEMENT
+                                    child: const Text("PROFILE"),
+                                    onPressed: () {
+                                      Get.to(const ProfileButtonsScreen());
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      fixedSize: Size(100, 80),
+                                      shape: CircleBorder(),
+                                    )),
+                                Obx(() => ElevatedButton(
+
+                                    ///VIEW CIRCLE INVITES REPLACEMENT
+                                    child: mainScreenController.locationLoading.value
+                                        ? const CircularProgressIndicator(
+                                            color: Colors.white,
+                                          )
+                                        : const Text("My Location"),
+                                    onPressed:
+                                        mainScreenController.locationLoading.value
+                                            ? () {}
+                                            : () async {
+                                                await _onLocationPressed();
+                                              },
+                                    style: ElevatedButton.styleFrom(
+                                      fixedSize: Size(130, 130),
+                                      shape: CircleBorder(),
+                                    ))),
+                                ElevatedButton(
+
+                                    ///VIEW CIRCLE INVITES REPLACEMENT
+                                    child: const Text("CIRCLES"),
+                                    onPressed: () {
+                                      Get.to(const CircleButtonScreens());
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      fixedSize: Size(100, 80),
+                                      shape: CircleBorder(),
+                                    )),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 30,
+                            ),
+                            ElevatedButton(
+
+                                ///VIEW CIRCLE INVITES REPLACEMENT
+                                child: const Text("EVENTS"),
+                                onPressed: () {
+                                  Get.to(EventButtonsScreen());
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  fixedSize: Size(100, 80),
+                                  shape: CircleBorder(),
+                                )),
+                          ],
                         ),
                       ),
-                      SizedBox(
-                        height: 30,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          ElevatedButton(
-
-                              ///VIEW CIRCLE INVITES REPLACEMENT
-                              child: const Text("PROFILE"),
-                              onPressed: () {
-                                Get.to(const ProfileButtonsScreen());
-                              },
-                              style: ElevatedButton.styleFrom(
-                                fixedSize: Size(100, 80),
-                                shape: CircleBorder(),
-                              )),
-                          Obx(() => ElevatedButton(
-
-                              ///VIEW CIRCLE INVITES REPLACEMENT
-                              child: mainScreenController.locationLoading.value
-                                  ? CircularProgressIndicator(
-                                      color: Colors.white,
-                                    )
-                                  : Text("My Location"),
-                              onPressed:
-                                  mainScreenController.locationLoading.value
-                                      ? () {}
-                                      : () async {
-                                          await _onLocationPressed();
-                                        },
-                              style: ElevatedButton.styleFrom(
-                                fixedSize: Size(130, 130),
-                                shape: CircleBorder(),
-                              ))),
-                          ElevatedButton(
-
-                              ///VIEW CIRCLE INVITES REPLACEMENT
-                              child: const Text("CIRCLES"),
-                              onPressed: () {
-                                Get.to(const CircleButtonScreens());
-                              },
-                              style: ElevatedButton.styleFrom(
-                                fixedSize: Size(100, 80),
-                                shape: CircleBorder(),
-                              )),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 30,
-                      ),
-                      ElevatedButton(
-
-                          ///VIEW CIRCLE INVITES REPLACEMENT
-                          child: const Text("EVENTS"),
-                          onPressed: () {
-                            Get.to(EventButtonsScreen());
-                          },
-                          style: ElevatedButton.styleFrom(
-                            fixedSize: Size(100, 80),
-                            shape: CircleBorder(),
-                          )),
                     ],
                   ),
                 ),
@@ -502,7 +513,7 @@ class MainCircleState extends State<MainCircle> {
     await CurrentUserInfo.getCurrentUserMapFresh();
     mainScreenController.locationLoading.value = false;
 
-    Get.to(() => GoogleMapScreen(currentPosition: position));
+    Get.to(() => GoogleMapScreen(myCurrentPosition: position));
   }
 
   Future<void> logout() async {
@@ -640,3 +651,4 @@ class NavigationBarItem extends StatelessWidget {
 class MainScreenController extends GetxController {
   Rx<bool> locationLoading = false.obs;
 }
+

@@ -107,16 +107,16 @@ class NewChatTabsScreen extends StatelessWidget {
                       indicatorPadding: EdgeInsets.only(top: 40),
                         tabs: const [
                       Tab(
-                        child: Text("Users", style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+                        child: Text("Circles", style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold, fontSize: 12),),
                       ),
                       Tab(
-                        child: Text("Circles", style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold)),
+                        child: Text("Users", style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold, fontSize: 12)),
                       ),
                           Tab(
-                            child: Text("Contacts", style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+                            child: Text("Contacts", style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,  fontSize: 12),),
                           ),
                           Tab(
-                        child: Text("Friends", style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold)),
+                        child: Text("Friends", style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,  fontSize: 12)),
                       ),
 
 
@@ -127,8 +127,8 @@ class NewChatTabsScreen extends StatelessWidget {
                 Expanded(child:             TabBarView(children:
 
                 [
-                  _buildUsersTabBody(),
                   _buildCirclesTabBody(),
+                  _buildUsersTabBody(),
                   _buildContactsTabBody(),
                   _buildFriendsTabBody(),
                 ]
