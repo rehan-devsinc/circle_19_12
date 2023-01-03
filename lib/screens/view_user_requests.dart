@@ -62,6 +62,11 @@ class _ViewUserRequestsPageState extends State<ViewUserRequestsPage> {
 
                 List<Map<String,dynamic>> users = snapshot.data!;
 
+                if(users.isEmpty){
+                  return const Center(
+                    child: Text("No Circle Joining Requests to show currently", style: TextStyle(color: Colors.white),),
+                  );
+                }
 
                 return ListView.builder(
                     itemCount: users.length,

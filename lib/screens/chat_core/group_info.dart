@@ -64,14 +64,11 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   uploadPhotoId() async {
     groupInfoController.pickedFile = await ImagePicker()
         .pickImage(source: ImageSource.gallery, imageQuality: 50);
-    if(groupInfoController.pickedFile!=null){
+    if (groupInfoController.pickedFile != null) {
       setState(() {});
     }
 
     print("upload photo id completed");
-
-
-
   }
 
   Future<String> uploadImageAndGetUrl() async {
@@ -145,21 +142,18 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(100),
-                              child: groupInfoController.pickedFile !=
-                                  null
+                              child: groupInfoController.pickedFile != null
                                   ? Image.file(
-                                  File(
-                                    groupInfoController
-                                        .pickedFile!.path,
-                                  ),
-                                  height: 100,
-                                  width: 100,
-                                  fit: BoxFit.cover)
+                                      File(
+                                        groupInfoController.pickedFile!.path,
+                                      ),
+                                      height: 100,
+                                      width: 100,
+                                      fit: BoxFit.cover)
                                   : Image.network(widget.groupRoom.imageUrl!,
-                                  height: 100,
-                                  width: 100,
-                                  fit: BoxFit.cover
-                              ),
+                                      height: 100,
+                                      width: 100,
+                                      fit: BoxFit.cover),
                             ),
                             Positioned(
                                 bottom: 5,
@@ -167,7 +161,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                 child: Container(
                                     decoration: BoxDecoration(
                                         color: Colors.white,
-                                        borderRadius: BorderRadius.circular(20)),
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
                                     padding: const EdgeInsets.all(5),
                                     child: const Icon(Icons.photo_camera)))
                           ],
@@ -334,144 +329,194 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: ElevatedButton(
-                              onPressed: () async {
-                                TextEditingController idController =
-                                    TextEditingController();
-                                Map? userMap;
-                                String? documentId;
-                                tried = false;
-                                await showDialog(
-                                    context: context,
-                                    builder: (_) => AlertDialog(
-                                          title: Text('Enter User Id'),
-                                          content: TextFormField(
-                                            controller: idController,
-                                            decoration: const InputDecoration(
-                                              border: OutlineInputBorder(),
-                                              focusedBorder:
-                                                  OutlineInputBorder(),
-                                              enabledBorder:
-                                                  OutlineInputBorder(),
-                                              isDense: true,
-                                            ),
-                                          ),
-                                          actions: [
-                                            ElevatedButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text("Cancel")),
-                                            ElevatedButton(
-                                                onPressed: () async {
-                                                  tried = true;
-                                                  QuerySnapshot<
-                                                          Map<String, dynamic>>
-                                                      collection =
-                                                      await FirebaseFirestore
-                                                          .instance
-                                                          .collection("users")
-                                                          .get();
-                                                  for (var document
-                                                      in collection.docs) {
-                                                    // QueryDocumentSnapshot<Map<String,dynamic>> doc = document;
-                                                    Map map = document.data();
-                                                    Map metadata =
-                                                        map['metadata'];
-                                                    if (metadata['user_id'] ==
-                                                        idController.text) {
-                                                      userMap = map;
-                                                      documentId = document.id;
-                                                      break;
-                                                    }
-                                                  }
+                            child: isManager
+                                ? StreamBuilder(
+                                    stream: FirebaseChatCore.instance
+                                        .room(widget.groupRoom.id),
+                                    builder: (BuildContext context,
+                                        AsyncSnapshot<types.Room>
+                                            snapshot) {
+                                      if (!(snapshot.connectionState ==
+                                              ConnectionState.waiting ||
+                                          (!(snapshot.hasData)))) {
+                                        types.Room newRoom =
+                                            snapshot.data!;
+                                        Map metadata =
+                                            newRoom.metadata ?? {};
+                                        List req =
+                                            metadata['userRequests'] ??
+                                                [];
+                                        reqCount = req.length;
+                                      }
 
-                                                  // DocumentSnapshot<Map>
-                                                  //     documentSnapshot =
-                                                  //     await FirebaseFirestore
-                                                  //         .instance
-                                                  //         .collection("users")
-                                                  //         .doc(
-                                                  //             idController.text)
-                                                  //         .get();
-                                                  // userMap =
-                                                  //     documentSnapshot.data();
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text("Confirm"))
-                                          ],
-                                        ));
-
-                                if (userMap != null) {
-                                  await showDialog(
-                                      context: context,
-                                      builder: (_) => AlertDialog(
-                                            title: const Text('User Found'),
-                                            content: Container(
-                                              margin: const EdgeInsets.only(
-                                                  right: 16),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  CircleAvatar(
-                                                    // backgroundColor: hasImage ? Colors.transparent : color,
-                                                    backgroundImage:
-                                                        NetworkImage(userMap![
-                                                            "imageUrl"]),
-                                                    radius: 40,
-                                                    child: null,
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 15,
-                                                  ),
-                                                  Text(
-                                                      "${userMap!['firstName']} ${userMap!['lastName']}")
-                                                ],
-                                              ),
-                                            ),
-                                            actions: [
-                                              ElevatedButton(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: Text("Cancel")),
-                                              ElevatedButton(
-                                                  onPressed: () async {
-                                                    try {
-                                                      // await FirebaseFirestore.instance.collection("rooms")
-                                                      //     .doc(widget.groupRoom.id)
-                                                      //     .update({"users": userIds});
-                                                      await FirebaseFirestore
-                                                          .instance
-                                                          .collection("rooms")
-                                                          .doc(widget
-                                                              .groupRoom.id)
-                                                          .update({
-                                                        "userIds": FieldValue
-                                                            .arrayUnion(
-                                                                [documentId!])
-                                                      });
-                                                      Navigator.pop(context);
-                                                      Get.snackbar("Success",
-                                                          "${userMap!['firstName']} is added to circle",
-                                                          backgroundColor:
-                                                              Colors.white);
-                                                    } catch (e) {
-                                                      Get.snackbar("error",
-                                                          e.toString());
-                                                      print(e);
-                                                    }
-                                                  },
-                                                  child: Text("Add"))
+                                      return ElevatedButton(
+                                          onPressed: () {
+                                            Get.to(ViewUserRequestsPage(groupRoom: widget.groupRoom));
+                                          },
+                                          child: Row(
+                                            mainAxisSize:
+                                                MainAxisSize.min,
+                                            children: [
+                                              const Text(
+                                                  "Circle Requests"),
+                                              reqCount != 0
+                                                  ? Text(
+                                                      "($reqCount)",
+                                                      style: const TextStyle(
+                                                          color: Colors
+                                                              .yellow,
+                                                          fontSize: 18,
+                                                          fontWeight:
+                                                              FontWeight
+                                                                  .bold),
+                                                    )
+                                                  : SizedBox()
                                             ],
                                           ));
-                                } else if (tried) {
-                                  Get.snackbar("Sorry", "No user found",
-                                      backgroundColor: Colors.white);
-                                }
-                              },
-                              child: const Text("Add User by uid")),
-                        ),
+                                    })
+                                : const SizedBox()),
+
+                        ///commenting add user by uid code
+                        // Expanded(
+                        //   child: ElevatedButton(
+                        //       onPressed: () async {
+                        //         TextEditingController idController =
+                        //             TextEditingController();
+                        //         Map? userMap;
+                        //         String? documentId;
+                        //         tried = false;
+                        //         await showDialog(
+                        //             context: context,
+                        //             builder: (_) => AlertDialog(
+                        //                   title: Text('Enter User Id'),
+                        //                   content: TextFormField(
+                        //                     controller: idController,
+                        //                     decoration: const InputDecoration(
+                        //                       border: OutlineInputBorder(),
+                        //                       focusedBorder:
+                        //                           OutlineInputBorder(),
+                        //                       enabledBorder:
+                        //                           OutlineInputBorder(),
+                        //                       isDense: true,
+                        //                     ),
+                        //                   ),
+                        //                   actions: [
+                        //                     ElevatedButton(
+                        //                         onPressed: () {
+                        //                           Navigator.pop(context);
+                        //                         },
+                        //                         child: Text("Cancel")),
+                        //                     ElevatedButton(
+                        //                         onPressed: () async {
+                        //                           tried = true;
+                        //                           QuerySnapshot<
+                        //                                   Map<String, dynamic>>
+                        //                               collection =
+                        //                               await FirebaseFirestore
+                        //                                   .instance
+                        //                                   .collection("users")
+                        //                                   .get();
+                        //                           for (var document
+                        //                               in collection.docs) {
+                        //                             // QueryDocumentSnapshot<Map<String,dynamic>> doc = document;
+                        //                             Map map = document.data();
+                        //                             Map metadata =
+                        //                                 map['metadata'];
+                        //                             if (metadata['user_id'] ==
+                        //                                 idController.text) {
+                        //                               userMap = map;
+                        //                               documentId = document.id;
+                        //                               break;
+                        //                             }
+                        //                           }
+                        //
+                        //                           // DocumentSnapshot<Map>
+                        //                           //     documentSnapshot =
+                        //                           //     await FirebaseFirestore
+                        //                           //         .instance
+                        //                           //         .collection("users")
+                        //                           //         .doc(
+                        //                           //             idController.text)
+                        //                           //         .get();
+                        //                           // userMap =
+                        //                           //     documentSnapshot.data();
+                        //                           Navigator.pop(context);
+                        //                         },
+                        //                         child: Text("Confirm"))
+                        //                   ],
+                        //                 ));
+                        //
+                        //         if (userMap != null) {
+                        //           await showDialog(
+                        //               context: context,
+                        //               builder: (_) => AlertDialog(
+                        //                     title: const Text('User Found'),
+                        //                     content: Container(
+                        //                       margin: const EdgeInsets.only(
+                        //                           right: 16),
+                        //                       child: Column(
+                        //                         mainAxisSize: MainAxisSize.min,
+                        //                         children: [
+                        //                           CircleAvatar(
+                        //                             // backgroundColor: hasImage ? Colors.transparent : color,
+                        //                             backgroundImage:
+                        //                                 NetworkImage(userMap![
+                        //                                     "imageUrl"]),
+                        //                             radius: 40,
+                        //                             child: null,
+                        //                           ),
+                        //                           const SizedBox(
+                        //                             height: 15,
+                        //                           ),
+                        //                           Text(
+                        //                               "${userMap!['firstName']} ${userMap!['lastName']}")
+                        //                         ],
+                        //                       ),
+                        //                     ),
+                        //                     actions: [
+                        //                       ElevatedButton(
+                        //                           onPressed: () {
+                        //                             Navigator.pop(context);
+                        //                           },
+                        //                           child: Text("Cancel")),
+                        //                       ElevatedButton(
+                        //                           onPressed: () async {
+                        //                             try {
+                        //                               // await FirebaseFirestore.instance.collection("rooms")
+                        //                               //     .doc(widget.groupRoom.id)
+                        //                               //     .update({"users": userIds});
+                        //                               await FirebaseFirestore
+                        //                                   .instance
+                        //                                   .collection("rooms")
+                        //                                   .doc(widget
+                        //                                       .groupRoom.id)
+                        //                                   .update({
+                        //                                 "userIds": FieldValue
+                        //                                     .arrayUnion(
+                        //                                         [documentId!])
+                        //                               });
+                        //                               Navigator.pop(context);
+                        //                               Get.snackbar("Success",
+                        //                                   "${userMap!['firstName']} is added to circle",
+                        //                                   backgroundColor:
+                        //                                       Colors.white);
+                        //                             } catch (e) {
+                        //                               Get.snackbar("error",
+                        //                                   e.toString());
+                        //                               print(e);
+                        //                             }
+                        //                           },
+                        //                           child: Text("Add"))
+                        //                     ],
+                        //                   ));
+                        //         } else if (tried) {
+                        //           Get.snackbar("Sorry", "No user found",
+                        //               backgroundColor: Colors.white);
+                        //         }
+                        //       },
+                        //       child: const Text("Add User by uid")),
+                        // ),
+
                         SizedBox(
                           width: 20,
                         ),
@@ -490,53 +535,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     const SizedBox(
                       height: 5,
                     ),
-                    isManager
-                        ? Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              StreamBuilder(
-                                  stream: FirebaseChatCore.instance
-                                      .room(widget.groupRoom.id),
-                                  builder: (BuildContext context,
-                                      AsyncSnapshot<types.Room> snapshot) {
-                                    if (!(snapshot.connectionState ==
-                                            ConnectionState.waiting ||
-                                        (!(snapshot.hasData)))) {
-                                      types.Room newRoom = snapshot.data!;
-                                      Map metadata = newRoom.metadata ?? {};
-                                      List req = metadata['userRequests'] ?? [];
-                                      reqCount = req.length;
-                                    }
-
-                                    return ElevatedButton(
-                                        onPressed: () {
-                                          Get.to(ViewUserRequestsPage(
-                                              groupRoom: widget.groupRoom));
-                                        },
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Text(
-                                                "View Circle Requests  "),
-                                            reqCount != 0
-                                                ? Text(
-                                                    "($reqCount)",
-                                                    style: TextStyle(
-                                                        color: Colors.yellow,
-                                                        fontSize: 18,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  )
-                                                : SizedBox()
-                                          ],
-                                        ));
-                                  }),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                            ],
-                          )
-                        : const SizedBox(),
                     Row(
                       children: [
                         Expanded(
@@ -644,8 +642,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                   children: [
                                     ListView.builder(
                                         shrinkWrap: true,
-                                        physics: const NeverScrollableScrollPhysics(),
-                                        itemCount: snapshot.data!.users.length + 1,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemCount:
+                                            snapshot.data!.users.length + 1,
                                         itemBuilder: (context, index) {
                                           if (index == 0) {
                                             return Padding(
@@ -655,7 +655,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                                 "${snapshot.data!.users.length} Participants",
                                                 style: const TextStyle(
                                                     fontSize: 18,
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
                                             );
                                           }
@@ -676,22 +677,27 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                             manager: managers.contains(user.id),
                                           );
                                         }),
-                                    const SizedBox(height: 20,),
-                                    Obx(() => ElevatedButton(onPressed: (){
-                                      if(snapshot.hasData){
-
-                                        _onLocationPressed(snapshot.data!.users);
-                                      }
-
-                                    },
-                                child: groupInfoController.locationLoading.value ? const CircularProgressIndicator(
-                                color: Colors.white,
-                                ) : const Text("View Users Location"),
-                                      style: ElevatedButton.styleFrom(
-                                          fixedSize: const Size(210, 40),
-                                          backgroundColor:  Colors.pink),
-                                    )),
-
+                                    const SizedBox(
+                                      height: 20,
+                                    ),
+                                    Obx(() => ElevatedButton(
+                                          onPressed: () {
+                                            if (snapshot.hasData) {
+                                              _onLocationPressed(
+                                                  snapshot.data!.users);
+                                            }
+                                          },
+                                          child: groupInfoController
+                                                  .locationLoading.value
+                                              ? const CircularProgressIndicator(
+                                                  color: Colors.white,
+                                                )
+                                              : const Text(
+                                                  "View Users Location"),
+                                          style: ElevatedButton.styleFrom(
+                                              fixedSize: const Size(210, 40),
+                                              backgroundColor: Colors.pink),
+                                        )),
                                   ],
                                 );
                               });
@@ -796,7 +802,6 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
   }
 
   Future<void> _onLocationPressed(List<types.User> users) async {
-
     List<types.User> updatedUsers = List.castFrom(users);
     groupInfoController.locationLoading.value = true;
 
@@ -825,7 +830,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
         // returned true. According to Android guidelines
         // your App should show an explanatory UI now.
 
-        Get.snackbar("Request Failed", "Location permission denied", backgroundColor: Colors.white);
+        Get.snackbar("Request Failed", "Location permission denied",
+            backgroundColor: Colors.white);
         groupInfoController.locationLoading.value = false;
 
         return;
@@ -836,7 +842,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
       // Permissions are denied forever, handle appropriately.
 
       Get.snackbar("Request Failed",
-          "Location permissions are permanently denied, we cannot request permissions. Enable from app settings",backgroundColor: Colors.white);
+          "Location permissions are permanently denied, we cannot request permissions. Enable from app settings",
+          backgroundColor: Colors.white);
 
       groupInfoController.locationLoading.value = false;
 
@@ -847,11 +854,14 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
     // continue accessing the position of the device.
     Position position = await Geolocator.getCurrentPosition();
     await CurrentUserInfo.getCurrentUserMapFresh();
-    updatedUsers.removeWhere((element) => element.id==FirebaseAuth.instance.currentUser!.uid);
+    updatedUsers.removeWhere(
+        (element) => element.id == FirebaseAuth.instance.currentUser!.uid);
     groupInfoController.locationLoading.value = false;
-    Get.to(() => GoogleMapScreen(myCurrentPosition: position, users: users, ));
+    Get.to(() => GoogleMapScreen(
+          myCurrentPosition: position,
+          users: users,
+        ));
   }
-
 }
 
 class MuteButton extends StatefulWidget {
