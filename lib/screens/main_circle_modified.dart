@@ -6,6 +6,7 @@ import 'package:circle/screens/chat_core/search_chat_screen.dart';
 import 'package:circle/screens/chat_core/search_users.dart';
 import 'package:circle/screens/chat_core/users.dart';
 import 'package:circle/screens/new_chat_screen.dart';
+import 'package:circle/screens/profile_screen.dart';
 import 'package:circle/screens/view_circle_page.dart';
 import 'package:circle/userinfo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -402,7 +403,8 @@ class MainCircleState extends State<MainCircle> {
                                     ///VIEW CIRCLE INVITES REPLACEMENT
                                     child: const Text("PROFILE"),
                                     onPressed: () {
-                                      Get.to(const ProfileButtonsScreen());
+                                      Get.to(()=>ProfileScreen());
+                                      // Get.to(const ProfileButtonsScreen());
                                     },
                                     style: ElevatedButton.styleFrom(
                                       fixedSize: Size(100, 80),

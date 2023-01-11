@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'chat_core/users.dart';
+
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({Key? key}) : super(key: key);
 
@@ -38,8 +40,11 @@ class ProfileScreen extends StatelessWidget {
                       snapshot) {
                 if (snapshot.data == null ||
                     snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
+                  return SizedBox(
+                    height: Get.height,
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
                   );
                 }
 
@@ -70,8 +75,22 @@ class ProfileScreen extends StatelessWidget {
                         imageUrl: userMap['imageUrl'],
                         profileController: profileController,
                       ),
+
+                      const SizedBox(
+                        height: 20,
+                      ),
+
+                      ElevatedButton(
+
+                          child: const Text("My Friends",textAlign: TextAlign.center),
+                          onPressed: () {
+                            Get.to(const UsersPage(onlyUsers: true, friendsOnly: true,));
+                          }),
+
+
+
                       SizedBox(
-                        height: Get.height * 0.0777 * 0.65,
+                        height: 30,
                       ),
                       Row(
                         children: [
