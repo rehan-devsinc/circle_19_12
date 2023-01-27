@@ -9,6 +9,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../controllers/news_feed_controller.dart';
+import '../../globals/global_functions.dart';
+import '../other_user_profile.dart';
+import '../profile_screen.dart';
 
 class NewsFeedScreen extends StatelessWidget {
   NewsFeedScreen({Key? key, required this.groupRoom}) : super(key: key);
@@ -46,6 +49,13 @@ class NewsFeedScreen extends StatelessWidget {
 
             newsFeedController.fillList(posts.length);
 
+            if(posts.isEmpty){
+              return const Center(
+                child: Text("Nothing to show"),
+              );
+            }
+
+
             return ListView.separated(
               separatorBuilder: (context, index){
                 if(index==(posts.length-1)){
@@ -60,7 +70,7 @@ class NewsFeedScreen extends StatelessWidget {
                   return FutureBuilder(
                       future: FirebaseFirestore.instance
                           .collection('users')
-                          .doc(FirebaseAuth.instance.currentUser!.uid)
+                          .doc(posts[index].authorId)
                           .get(),
                       builder: (context,
                           AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
@@ -74,7 +84,7 @@ class NewsFeedScreen extends StatelessWidget {
                         }
 
                         return _buildPostWidget(
-                            snapshot.data!.data()!, posts[index],listItemIndex: index);
+                            snapshot.data!.data()!, posts[index],listItemIndex: index,userId: posts[index].authorId );
                       });
                 });
           }),
@@ -87,7 +97,7 @@ class NewsFeedScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPostWidget(Map<String, dynamic> userMap, PostModel post,{required int listItemIndex}) {
+  Widget _buildPostWidget(Map<String, dynamic> userMap, PostModel post,{required int listItemIndex, required String userId}) {
     return Padding(
       padding:  EdgeInsets.only(bottom: 12.h),
       child: Material(
@@ -107,19 +117,32 @@ class NewsFeedScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        CircleAvatar(
-                          backgroundImage: NetworkImage(userMap['imageUrl']),
-                          radius: 20.r,
-                        ),
-                        10.horizontalSpace,
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(userMap['firstName'] + " " + userMap['lastName'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),),
-                            5.verticalSpace,
+                        InkWell(
+                          onTap: (){
+                            if(userId == FirebaseAuth.instance.currentUser!.uid){
+                              Get.to(()=>ProfileScreen());
+                            }
+                            else {
+                              Get.to(() => OtherUserProfileScreen(
+                                otherUser: getUserFromMap(userMap,userId),
+                              ));
+                            }
 
-                          ],
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircleAvatar(
+                                backgroundImage: NetworkImage(userMap['imageUrl']),
+                                radius: 20.r,
+                              ),
+                              10.horizontalSpace,
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 5.h),
+                                child: Text(userMap['firstName'] + " " + userMap['lastName'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),),
+                              ),
+                            ],
+                          ),
                         ),
                         const Spacer(),
                         Text(timeago.format(post.createdAt),style: TextStyle(fontSize: 12.sp),),

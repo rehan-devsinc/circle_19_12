@@ -27,7 +27,7 @@ class _SingleUserTileState extends State<SingleUserTile> {
 
   @override
   Widget build(BuildContext context) {
-    return deleted ? SizedBox() : Container(
+    return deleted ? const SizedBox() : Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 8,
@@ -50,12 +50,12 @@ class _SingleUserTileState extends State<SingleUserTile> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(getUserName(widget.user), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
+                Text(getUserName(widget.user), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
                 SizedBox(height: widget.manager ? 2 : 0,),
-                widget.manager ? Text("manager") : SizedBox(height: 0,),
+                widget.manager ? const Text("manager") : const SizedBox(height: 0,),
               ],
             ),
-            Spacer(),
+            const Spacer(),
             !loading ?
             Visibility(
               visible: widget.hideDelete ? false : true,
@@ -66,7 +66,7 @@ class _SingleUserTileState extends State<SingleUserTile> {
                 onTap: () async{
                   await removeMember();
                 },
-                  child: Icon(Icons.delete_outline)
+                  child: const Icon(Icons.delete_outline)
               ),
             ) : const SizedBox(
               height: 30,

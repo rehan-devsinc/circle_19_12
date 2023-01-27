@@ -254,27 +254,33 @@ class _RoomsPageState extends State<RoomsPage> {
                                         ),
                                         Row(
                                           children: [
-                                            FutureBuilder(
-                                              future: fetchLastMsg(room),
-                                              builder: (BuildContext context,
-                                                  AsyncSnapshot snapshot) {
-                                                if (snapshot.connectionState ==
-                                                    ConnectionState.waiting) {
-                                                  return const Text(
-                                                    "Loading",
-                                                    style: TextStyle(
-                                                        color: Colors.black),
-                                                  );
-                                                }
+                                            Expanded(
+                                              child: FutureBuilder(
+                                                future: fetchLastMsg(room),
+                                                builder: (BuildContext context,
+                                                    AsyncSnapshot snapshot) {
+                                                  if (snapshot.connectionState ==
+                                                      ConnectionState.waiting) {
+                                                    return const Text(
+                                                      "Loading",
+                                                      style: TextStyle(
+                                                          color: Colors.black),
+                                                    );
+                                                  }
 
-                                                return Text(
-                                                  snapshot.data!,
-                                                  style:
-                                                      TextStyle(color: Colors.black),
-                                                );
-                                              },
+                                                  return Text(
+                                                    snapshot.data!,
+                                                    maxLines: 1,
+                                                    style:
+                                                        TextStyle(color: Colors.black,
+                                                        fontStyle: FontStyle.italic
+                                                        ),
+                                                    overflow: TextOverflow.ellipsis,
+                                                    softWrap: false,
+                                                  );
+                                                },
+                                              ),
                                             ),
-                                            const Spacer(),
                                             muted ? const Icon(CupertinoIcons.bell_slash_fill, color: Colors.black,) : SizedBox()
                                           ],
                                         )
@@ -316,7 +322,10 @@ class _RoomsPageState extends State<RoomsPage> {
           .collection("rooms").doc(room.id).get();
       final Map<String, dynamic> map = snapshot.data()!;
       globalRoomMap[room.id] = map["lastMsg"] ?? "chat ..." ;
-      return map["lastMsg"] ?? "chat";
+
+      Map<String,dynamic> metadata = map["metadata"] ?? {};
+
+      return map["lastMsg"] ?? ( metadata['description'] ?? "chating");
     }
     catch(e){
       return "Error";

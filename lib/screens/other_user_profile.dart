@@ -2,6 +2,7 @@ import 'package:circle/screens/google_maps_screen.dart';
 import 'package:circle/utils/profile_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -60,19 +61,15 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(100),
               child: Image.network(widget.otherUser.imageUrl!,
-                  height: 200, width: 200, fit: BoxFit.cover),
+                  height: 100.h, width: 100.h, fit: BoxFit.cover),
             ),
-            SizedBox(
-              height: Get.height * 0.0777 * 0.5,
-            ),
+            20.verticalSpace,
             Text(
               (widget.otherUser.firstName ?? "") +
                   ((widget.otherUser.lastName ?? "")),
               style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(
-              height: 20,
-            ),
+          10.verticalSpace,
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -209,7 +206,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
               ],
             ),
             const SizedBox(
-              height: 30,
+              height: 10,
             ),
             Padding(
               padding:
@@ -252,17 +249,11 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
             const SizedBox(
               height: 20,
             ),
-            // ElevatedButton(
-            //     onPressed: () async {
-            //       profileController.saveInfo(
-            //           hobby: hobbyController.text,
-            //           music: musicController.text,
-            //           imageUrl: userMap['imageUrl'], book: bookController.text, band: bandController.text);
-            //     },
-            //     child: const Text('Save')),
-            const SizedBox(
-              height: 20,
+            Padding(
+              padding:  EdgeInsets.symmetric(horizontal: paddingRes30),
+              child: _buildTagsPortion((((widget.otherUser.metadata ?? {})['tags'] ?? []) as List).map((e) => e.toString()).toList(), context),
             ),
+            30.verticalSpace,
           ],
         ),
       ),
@@ -392,5 +383,64 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
 
     Get.to(() => GoogleMapScreen(myCurrentPosition: position, preferredPosition: LatLng(positionMap['lat'], positionMap['long'],), users: [widget.otherUser],userSelected: true, ));
   }
+
+  Widget _buildTagsPortion(List<String> myTags, BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Text(
+              " Favourite Tags: ",
+              style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18.sp),
+            ),
+            30.horizontalSpace,
+            if (myTags.isEmpty)
+              const Text("EMPTY",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                      fontStyle: FontStyle.italic)),
+          ],
+        ),
+        10.verticalSpace,
+        if (myTags.isNotEmpty)
+          Padding(
+            padding: EdgeInsets.only(right: 40.w),
+            child: SizedBox(
+              width: Get.width,
+              child: Wrap(
+                alignment: WrapAlignment.start,
+                // runAlignment: WrapAlignment.start,
+                // crossAxisAlignment: WrapCrossAlignment.start,
+                runSpacing: 10.h,
+                spacing: 12.w,
+                children: [
+                  for (var i in myTags) _buildSingleTag(i,context),
+                ],
+              ),
+            ),
+          )
+      ],
+    );
+  }
+
+  Widget _buildSingleTag(String tag, BuildContext context,) {
+    return Container(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            tag,
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.normal),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+          color: Colors.pink, borderRadius: BorderRadius.circular(15.r)),
+    );
+  }
+
 
 }

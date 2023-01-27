@@ -363,6 +363,7 @@ class _SelectCircleToJoinScreenState extends State<SelectCircleToJoinScreen> {
       else if (tried == true && room == null) {
         Get.snackbar("Sorry", "No circle found", backgroundColor: Colors.white);
       }
+
     }
   }
 

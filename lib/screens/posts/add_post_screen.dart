@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:circle/screens/posts/news_feed_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -12,7 +13,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 class AddPostScreen extends StatefulWidget {
-   const AddPostScreen({Key? key, required this.groupRoom}) : super(key: key);
+   const AddPostScreen({Key? key, required this.groupRoom, this.goToPostsPage = false}) : super(key: key);
+   final bool goToPostsPage;
 
    final types.Room groupRoom;
 
@@ -136,8 +138,13 @@ class _AddPostScreenState extends State<AddPostScreen> {
     await FirebaseFirestore.instance.collection("posts").doc(uid).set(post.toJson());
 
     loadingText = null;
-    Get.back();
 
+    if(widget.goToPostsPage){
+      Get.off(()=>NewsFeedScreen(groupRoom: widget.groupRoom ));
+    }
+    else {
+      Get.back();
+    }
   }
 
   Future<String> uploadImageAndGetUrl(XFile pickedFile) async {
@@ -175,7 +182,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         setState(() {});
                       },
                       child: Container(
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.white
                           ),

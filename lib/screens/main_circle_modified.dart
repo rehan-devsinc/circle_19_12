@@ -1,3 +1,4 @@
+import 'package:circle/controllers/tags_matching_controller.dart';
 import 'package:circle/logoutController.dart';
 import 'package:circle/phone_login/phone_login.dart';
 import 'package:circle/screens/buttons_screens/circle_buttons_screens.dart';
@@ -6,6 +7,7 @@ import 'package:circle/screens/chat_core/search_chat_screen.dart';
 import 'package:circle/screens/chat_core/search_users.dart';
 import 'package:circle/screens/chat_core/users.dart';
 import 'package:circle/screens/new_chat_screen.dart';
+import 'package:circle/screens/posts/select_circle_for_posts.dart';
 import 'package:circle/screens/profile_screen.dart';
 import 'package:circle/screens/view_circle_page.dart';
 import 'package:circle/userinfo.dart';
@@ -15,6 +17,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:circle/screens/Create_Circle_screen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import '../notification_service/local_notification_service.dart';
@@ -48,7 +51,7 @@ class MainCircleState extends State<MainCircle> {
     );
   }
 
-  checkUser() async {
+  Future<bool> checkUserAndMatchTags() async {
     try {
       if (!((await FirebaseFirestore.instance
               .collection('users')
@@ -56,8 +59,17 @@ class MainCircleState extends State<MainCircle> {
               .get()))
           .exists) {
         Get.offAll(() => const PhoneLoginScreen());
+        return false;
       }
-    } catch (e) {}
+
+      TagsController tagsController = TagsController();
+      tagsController.initiateMatching();
+
+      return true;
+
+    } catch (e) {
+      return false;
+    }
   }
 
   @override
@@ -66,7 +78,8 @@ class MainCircleState extends State<MainCircle> {
       print("current user is null");
       Get.offAll(() => const PhoneLoginScreen());
     } else {
-      checkUser();
+      checkUserAndMatchTags();
+
       print("current user is not null");
     }
 
@@ -381,16 +394,33 @@ class MainCircleState extends State<MainCircle> {
                         child: Column(
                           children: <Widget>[
                             const SizedBox(height: 100,),
-                            ElevatedButton(
-                              child: const Text("TEXT"),
-                              onPressed: () {
-                                Get.to(()=>NewChatTabsScreen());
-                                // viewMyCircles(context);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                fixedSize: const Size(80, 80),
-                                shape: const CircleBorder(),
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                ElevatedButton(
+                                  child: Text("Posts".toUpperCase(),style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.cyanAccent)),
+                                  onPressed: () {
+                                    Get.to(()=>SelectCircleForPosts());
+                                    // viewMyCircles(context);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    fixedSize: const Size(80, 80),
+                                    shape: const CircleBorder(),
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  child: const Text("TEXT"),
+                                  onPressed: () {
+                                    Get.to(()=>NewChatTabsScreen());
+                                    // viewMyCircles(context);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    fixedSize: const Size(80, 80),
+                                    shape: const CircleBorder(),
+                                  ),
+                                ),
+
+                              ],
                             ),
                             const SizedBox(
                               height: 30,
@@ -444,17 +474,35 @@ class MainCircleState extends State<MainCircle> {
                             SizedBox(
                               height: 30,
                             ),
-                            ElevatedButton(
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                ElevatedButton(
 
-                                ///VIEW CIRCLE INVITES REPLACEMENT
-                                child: const Text("EVENTS"),
-                                onPressed: () {
-                                  Get.to(EventButtonsScreen());
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  fixedSize: Size(100, 80),
-                                  shape: CircleBorder(),
-                                )),
+                                  ///VIEW CIRCLE INVITES REPLACEMENT
+                                    child:  Text("EVENTS".toUpperCase(), textAlign: TextAlign.center),
+                                    onPressed: () {
+                                      Get.to(EventButtonsScreen());
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      fixedSize: Size(100, 80),
+                                      shape: CircleBorder(),
+                                    )),
+                                ElevatedButton(
+
+                                    ///VIEW CIRCLE INVITES REPLACEMENT
+                                    child:  Text("ADD POST",style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.cyanAccent),),
+                                    onPressed: () {
+                                      Get.to(()=>const SelectCircleForPosts(toViewPosts: false,));
+
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      fixedSize: const Size(100, 80),
+                                      shape: const CircleBorder(),
+                                      // backgroundColor: Colors.green
+                                    )),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -558,6 +606,8 @@ class MainCircleState extends State<MainCircle> {
 
     logOutController.loading.value = false;
     CurrentUserInfo.userMap = null;
+
+    DBOperations.fcmToken = null;
 
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
       return PhoneLoginScreen();

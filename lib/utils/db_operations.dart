@@ -35,7 +35,10 @@ class DBOperations{
 
   static Future<String> getDeviceTokenToSendNotification() async {
 
+    print("getting device token for notification");
+
     if(fcmToken!=null){
+      print("Token Value $fcmToken");
       return fcmToken!;
     }
 
