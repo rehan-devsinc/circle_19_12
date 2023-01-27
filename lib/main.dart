@@ -9,6 +9,7 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'notification_service/local_notification_service.dart';
@@ -159,43 +160,50 @@ class AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
 
-    return GetMaterialApp(
+    return ScreenUtilInit(
+      designSize: const Size(392.727272, 825.4545),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context , child) {
+        return GetMaterialApp(
 
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-      ),
-      title: 'Circle',
-      home:
-          (FirebaseAuth.instance.currentUser!=null) ?
-          // ProfileButtonsScreen()
-          const MainCircle()
-            :
-          const PhoneLoginScreen()
-      // Center(
-      //   child: Scaffold(
-      //     appBar: AppBar(
-      //       title: const Text('Circle'),
-      //     ),
-      //     body: LoginPage()
-      //     // FutureBuilder(
-      //     //   future: _initFireBase(),
-      //     //   builder: (context, snapshot) {
-      //     //     if (snapshot.connectionState == ConnectionState.done) {
-      //     //       return Column(
-      //     //         children: const [
-      //     //           Text('Login'),
-      //     //           LoginPage(),
-      //     //         ],
-      //     //       );
-      //     //     }
-      //     //     return const Center(
-      //     //       child: CircularProgressIndicator(),
-      //     //     );
-      //     //   },
-      //     // )
-      //
-      //   ),
-      // ),
+            theme: ThemeData(
+              primarySwatch: Colors.deepPurple,
+            ),
+            title: 'Circle',
+            home:
+            (FirebaseAuth.instance.currentUser!=null) ?
+            // ProfileButtonsScreen()
+            const MainCircle()
+                :
+            const PhoneLoginScreen()
+          // Center(
+          //   child: Scaffold(
+          //     appBar: AppBar(
+          //       title: const Text('Circle'),
+          //     ),
+          //     body: LoginPage()
+          //     // FutureBuilder(
+          //     //   future: _initFireBase(),
+          //     //   builder: (context, snapshot) {
+          //     //     if (snapshot.connectionState == ConnectionState.done) {
+          //     //       return Column(
+          //     //         children: const [
+          //     //           Text('Login'),
+          //     //           LoginPage(),
+          //     //         ],
+          //     //       );
+          //     //     }
+          //     //     return const Center(
+          //     //       child: CircularProgressIndicator(),
+          //     //     );
+          //     //   },
+          //     // )
+          //
+          //   ),
+          // ),
+        );
+      },
     );
   }
 }

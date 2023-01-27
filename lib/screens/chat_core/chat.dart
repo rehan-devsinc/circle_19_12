@@ -185,26 +185,55 @@ class _ChatPageState extends State<ChatPage> {
         builder: (context, snapshot) => StreamBuilder<List<types.Message>>(
           initialData: const [],
           stream: FirebaseChatCore.instance.messages(snapshot.data!),
-          builder: (context, snapshot) => Chat(
-            theme: DefaultChatTheme(
-              primaryColor: Colors.black87
-            ),
-            // imageMessageBuilder:  _customImageMessageBuilder,
-            // customMessageBuilder: ,
-            showUserAvatars: true,
-            showUserNames: true,
-            isAttachmentUploading: _isAttachmentUploading,
-            messages: snapshot.data ?? [],
-            onAttachmentPressed: _handleAtachmentPressed,
-            onMessageTap: _handleMessageTap,
-            onPreviewDataFetched: _handlePreviewDataFetched,
-            onSendPressed: _handleSendPressed,
-            user: types.User(
-              id: FirebaseChatCore.instance.firebaseUser?.uid ?? '',
-            ),
-            customBottomWidget: _buildCustomBottomWidget(),
+          builder: (context, snapshot)
+          {
 
-          ),
+            List<types.Message> messages = snapshot.data?.map((types.Message e) => e).toList() ?? [];
+
+            print("before removing:");
+            print(            messages.any((element) {
+              if (element.type==(types.MessageType.text)){
+                types.TextMessage textMessage = types.TextMessage.fromJson(element.toJson());
+                return textMessage.text.trim().isEmpty;
+              }
+              return false;
+            } ));
+
+            messages.removeWhere((element) {
+              if (element.type==(types.MessageType.text)){
+                types.TextMessage textMessage = types.TextMessage.fromJson(element.toJson());
+                return textMessage.text.trim().isEmpty;
+              }
+              return false;
+            } );
+
+            print("after removing:");
+            print(messages.any((element) {
+              if (element.type==(types.MessageType.text)){
+                types.TextMessage textMessage = types.TextMessage.fromJson(element.toJson());
+                return textMessage.text.trim().isEmpty;
+              }
+              return false;
+            } ));
+
+
+
+            return Chat(
+              theme: DefaultChatTheme(primaryColor: Colors.black87),
+              showUserAvatars: true,
+              showUserNames: true,
+              isAttachmentUploading: _isAttachmentUploading,
+              messages: messages,
+              onAttachmentPressed: _handleAtachmentPressed,
+              onMessageTap: _handleMessageTap,
+              onPreviewDataFetched: _handlePreviewDataFetched,
+              onSendPressed: _handleSendPressed,
+              user: types.User(
+                id: FirebaseChatCore.instance.firebaseUser?.uid ?? '',
+              ),
+              customBottomWidget: _buildCustomBottomWidget(),
+            );
+          },
         ),
       ),
     );
@@ -223,6 +252,7 @@ class _ChatPageState extends State<ChatPage> {
       padding: const EdgeInsets.only(bottom: 16.0, left: 16, right: 16),
       child: Row(
         children: [
+          SizedBox(width: 20,),
           Expanded(
             child: TextFormField(
               controller: inputMessageController,
@@ -248,13 +278,16 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
           ),
-          SizedBox(width: 15,),
+          SizedBox(width: 30,),
           InkWell(
               onTap: (){
-                _handleSendPressed(types.PartialText(text: inputMessageController.text ));
-                inputMessageController.clear();
+                if(inputMessageController.text.trim().isNotEmpty){
+                  _handleSendPressed(
+                      types.PartialText(text: inputMessageController.text));
+                  inputMessageController.clear();
+                }
               },
-              child: Icon(Icons.send, color: Colors.purple,size: 40,))
+              child: const Icon(Icons.send,size: 35,))
         ],
       ),
     );
@@ -534,6 +567,57 @@ class _ChatPageState extends State<ChatPage> {
       _isAttachmentUploading = uploading;
     });
   }
+
+  Widget  _buildCustomBottomWidget1(){
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0, left: 16, right: 16),
+      child: Row(
+        children: [
+          SizedBox(width: 20,),
+          Expanded(
+            child: SizedBox(
+              height: 48,
+              child: TextFormField(
+                decoration:  InputDecoration(
+                  contentPadding: EdgeInsets.only(left: 16),
+                  filled: true,
+                  hintText: "Message",
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                    borderSide: const BorderSide(width: 0, color: Colors.transparent),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                    borderSide: const BorderSide(width: 0, color: Colors.transparent),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 15,),
+          InkWell(
+              onTap: (){
+                _handleSendPressed(types.PartialText(text: inputMessageController.text ));
+              },
+              child: Container(
+                padding: EdgeInsets.all(14),
+                height: 48,
+                width: 48,
+                decoration:  BoxDecoration(
+
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Icon(Icons.send),
+
+              )),
+          SizedBox(width: 20,),
+
+        ],
+      ),
+    );
+
+  }
+
 }
 
 class MuteTextButton extends StatefulWidget {

@@ -65,6 +65,8 @@ class CreateCircleState extends State<CreateCirclePage>{
   String? selectedStatus;
   String? selectedPrivacy;
 
+  List<Map<String, dynamic>> circleMaps = [];
+
 
   final db = FirebaseFirestore.instance;
   final DataRepository repo = DataRepository();
@@ -111,104 +113,139 @@ class CreateCircleState extends State<CreateCirclePage>{
           onPressed:()=> Navigator.pop(context,false),
           ),
         ),
-        body: SingleChildScrollView(
-          child: Stack(
-            children: <Widget>[
-              Center(
-                  child: Form(
-                    key: _formKey,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 0.0),
-                      child: Column(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 4.0, vertical: 10),
-                            child: TextFormField(
-                              controller: textControllerName,
-                              decoration: const InputDecoration(
-                                labelText: "Name:",
-                                hintText: 'Name of Circle'
-                              ),
-                              validator: (String? value){
-                                if(value == null || value.trim().isEmpty){
-                                  return "Name of Circle is required";
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 4.0, vertical: 10),
-                            child: TextFormField(
-                              controller: textControllerDescription,
-                              decoration: const InputDecoration(
-                                labelText: "Description",
-                                hintText: " Description of Circle"
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 4.0, vertical: 10),
-                            child: MyDropDownButton(dropdownValue: null, function: (String v) { selectedStatus = v;  }, hintText: 'Select Status', items: const ['temporary','permanent'],  ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 4.0, vertical: 10),
-                            child: MyDropDownButton(dropdownValue: null, function: (String v) { selectedPrivacy = v;  }, hintText: 'Select Privacy', items: const ['private','public'],  ),
-                          ),
+        body: StreamBuilder(
+          stream: FirebaseFirestore.instance.collection('rooms').snapshots(),
+          builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
 
-                          // Padding(
-                          //   padding: const EdgeInsets.symmetric(
-                          //       horizontal: 4.0, vertical: 10),
-                          //   child: TextFormField(
-                          //     controller: textControllerStatus,
-                          //     decoration: const InputDecoration(
-                          //       hintText: "Temporary or Permanent",
-                          //       labelText: "Status",
-                          //     ),
-                          //   ),
-                          // ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 4.0, vertical: 10),
-                            child: TextFormField(
-                              controller: textControllerContact,
-                              decoration: const InputDecoration(
-                                labelText: "Contact",
-                                hintText: "Primary Contact Name"
-                              ),
-                            ),
-                          ),
-                        loading ? const SizedBox(
-                          height: 50,
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        )  : ElevatedButton(
-                            onPressed: () async{
-                              if (!widget.childCircle){
-                                  await createCircle(context);
-                                }
-                              else {
-                                await createChildCircle(context);
-                              }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+
+            circleMaps = snapshot.data!.docs.map((e) {
+
+              Map<String,dynamic> map = Map.from(e.data());
+              map['id'] = e.id;
+
+              // print("e.id: ${e.id}");
+              // e.data()['id'] = e.id;
+              // print(e.data()['id']);
+              //
+              // e.data().addEntries([
+              //   MapEntry('id', e.id)
+              // ]);
+              print(map['id']);
+              return map;
+            }).toList();
 
 
-                              }, child: const Text("Submit"))
-                        ],
-                      ),
-                    ),
+
+            return SingleChildScrollView(
+              child: Stack(
+                children: <Widget>[
+                  Center(
+                      child: Form(
+                        key: _formKey,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                          child: Column(
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 4.0, vertical: 10),
+                                child: TextFormField(
+                                  controller: textControllerName,
+                                  decoration: const InputDecoration(
+                                    labelText: "Name:",
+                                    hintText: 'Name of Circle'
+                                  ),
+                                  validator: (String? value){
+                                    if(value == null || value.trim().isEmpty){
+                                      return "Name of Circle is required";
+                                    }
+                                    if (checkCircleNameExists(value)){
+                                      return "Circle with this name exists already.";
+                                    }
+
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10),
+                                child: TextFormField(
+                                  controller: textControllerDescription,
+                                  decoration: const InputDecoration(
+                                    labelText: "Description",
+                                    hintText: " Description of Circle"
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 4.0, vertical: 10),
+                                child: MyDropDownButton(dropdownValue: null, function: (String v) { selectedStatus = v;  }, hintText: 'Select Status', items: const ['temporary','permanent'],  ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 4.0, vertical: 10),
+                                child: MyDropDownButton(dropdownValue: null, function: (String v) { selectedPrivacy = v;  }, hintText: 'Select Privacy', items: const ['private','public'],  ),
+                              ),
+
+                              // Padding(
+                              //   padding: const EdgeInsets.symmetric(
+                              //       horizontal: 4.0, vertical: 10),
+                              //   child: TextFormField(
+                              //     controller: textControllerStatus,
+                              //     decoration: const InputDecoration(
+                              //       hintText: "Temporary or Permanent",
+                              //       labelText: "Status",
+                              //     ),
+                              //   ),
+                              // ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 4.0, vertical: 10),
+                                child: TextFormField(
+                                  controller: textControllerContact,
+                                  decoration: const InputDecoration(
+                                    labelText: "Contact",
+                                    hintText: "Primary Contact Name"
+                                  ),
+                                ),
+                              ),
+                            loading ? const SizedBox(
+                              height: 50,
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            )  : ElevatedButton(
+                                onPressed: () async{
+                                  if (!widget.childCircle){
+                                      await createCircle(context);
+                                    }
+                                  else {
+                                    await createChildCircle(context);
+                                  }
+
+
+                                  }, child: const Text("Submit"))
+                            ],
+                          ),
+                        ),
+                      )
                   )
-              )
-            ],
-          ),
+                ],
+              ),
+            );
+          }
         ),
       ),
     );
   }
+
+
 
   Future<void> createCircle(BuildContext context) async{
     if(_formKey.currentState!.validate()){
@@ -259,6 +296,17 @@ class CreateCircleState extends State<CreateCirclePage>{
         Get.snackbar("Denied", "Select Circle Status");
       }
     }
+  }
+
+  bool checkCircleNameExists(String name){
+    for(int i=0; i<circleMaps.length; i++){
+      if(circleMaps[i]["name"] == name){
+        return true;
+      }
+    }
+
+    return false;
+
   }
 
   Future<void> createChildCircle(BuildContext context) async{

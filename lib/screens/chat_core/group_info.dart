@@ -3,6 +3,8 @@ import 'package:circle/screens/calendar_list_events.dart';
 import 'package:circle/screens/chat_core/add_group_members.dart';
 import 'package:circle/screens/chat_core/chat.dart';
 import 'package:circle/screens/chat_core/view_nested_rooms.dart';
+import 'package:circle/screens/posts/add_post_screen.dart';
+import 'package:circle/screens/posts/news_feed_screen.dart';
 import 'package:circle/screens/view_user_requests.dart';
 import 'package:circle/utils/dynamiclink_helper.dart';
 import 'package:circle/widgets/single_user_tile.dart';
@@ -12,6 +14,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -103,6 +106,8 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
               ),
             );
           }
+
+          bool isChildCircle = (widget.groupRoom.metadata != null) && (widget.groupRoom.metadata!["isChildCircle"] ??  false);
 
           return Scaffold(
               appBar: AppBar(
@@ -242,6 +247,28 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     const SizedBox(
                       height: 20,
                     ),
+
+                    if(!isChildCircle)
+                      ElevatedButton(
+                          onPressed: () {
+                            Get.to(()=>NewsFeedScreen(groupRoom: widget.groupRoom,));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.pink,
+                            fixedSize: Size.fromHeight(50.r)
+                          ),
+                          child: Row(
+
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.photo),
+                              SizedBox(width: 20.w,),
+                              const Text("View Circle Feed"),
+                            ],
+                          )),
+
+
+
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 16),
@@ -284,7 +311,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                         ((widget.groupRoom.metadata != null) &&
                                 (widget.groupRoom.metadata!["isChildCircle"] ??
                                     false))
-                            ? SizedBox()
+                            ? const SizedBox()
                             : Expanded(
                                 child: ElevatedButton(
                                     onPressed: () {
@@ -328,9 +355,10 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                     ),
                     Row(
                       children: [
+                    isManager
+                    ?
                         Expanded(
-                            child: isManager
-                                ? StreamBuilder(
+                            child:  StreamBuilder(
                                     stream: FirebaseChatCore.instance
                                         .room(widget.groupRoom.id),
                                     builder: (BuildContext context,
@@ -374,7 +402,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                             ],
                                           ));
                                     })
-                                : const SizedBox()),
+                                ) : const SizedBox(),
 
                         ///commenting add user by uid code
                         // Expanded(
@@ -558,16 +586,16 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                     const SizedBox(
                                       width: 10,
                                     ),
-                                    Expanded(child: Text(widget.groupRoom.id)),
+                                    Expanded(child: Text(widget.groupRoom.name ?? "")),
                                     IconButton(
                                         onPressed: () async {
                                           await Clipboard.setData(ClipboardData(
-                                              text: widget.groupRoom.id));
+                                              text: widget.groupRoom.name));
                                           Get.snackbar("Success",
                                               "Circle Id Copied to Clipboard",
                                               backgroundColor: Colors.white);
                                         },
-                                        icon: const Icon(Icons.copy_outlined))
+                                        icon: const Icon(Icons.copy_outlined)),
                                     // InkWell(
                                     //   onTap: () {
                                     //     Clipboard.setData(
