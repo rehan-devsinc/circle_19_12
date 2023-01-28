@@ -55,6 +55,7 @@ void main() async{
   // }
   // await FirebaseAuth.instance.signOut();
 
+  print("in main current user id: ${FirebaseAuth.instance.currentUser?.uid}");
   runApp(const App());
 
 }

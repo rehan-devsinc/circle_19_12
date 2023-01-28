@@ -131,7 +131,7 @@ class CircleButtonScreens extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text("Circle Invites", textAlign: TextAlign.center,),
-                        count != 0 ?Text("  ($count)", style: const TextStyle(color: Colors.yellow, fontSize: 18, fontWeight: FontWeight.bold),) : SizedBox()
+                        count != 0 ?Flexible(child: Text("  ($count)", style: const TextStyle(color: Colors.yellow, fontSize: 18, fontWeight: FontWeight.bold),)) : SizedBox()
                       ],
                     ),
                     onPressed: () {

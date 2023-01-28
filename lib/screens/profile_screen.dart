@@ -322,10 +322,9 @@ class ProfileScreen extends StatelessWidget {
                       fontStyle: FontStyle.italic)),
           ],
         ),
-        10.verticalSpace,
         if (myTags.isNotEmpty)
           Padding(
-            padding: EdgeInsets.only(right: 40.w),
+            padding: EdgeInsets.only(right: 40.w, top: 10.h),
             child: SizedBox(
               width: Get.width,
               child: Wrap(
@@ -339,7 +338,10 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-          )
+          ),
+        10.verticalSpace,
+        Text("We will connect you with relevant circles based on your favourite tags.", style: TextStyle(color: Colors.grey[700]),),
+
       ],
     );
   }

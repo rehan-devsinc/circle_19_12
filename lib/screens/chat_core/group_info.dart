@@ -1,4 +1,5 @@
 import 'package:circle/group_info_controller.dart';
+import 'package:circle/qrcode/qrcode_page.dart';
 import 'package:circle/screens/calendar_list_events.dart';
 import 'package:circle/screens/chat_core/add_group_members.dart';
 import 'package:circle/screens/chat_core/chat.dart';
@@ -266,6 +267,28 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                               const Text("View Circle Feed"),
                             ],
                           )),
+                    if(!isChildCircle)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: ElevatedButton(
+                            onPressed: () {
+                              Get.to(()=>QrCodeScreen(data: circleLink));
+                            },
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.pink,
+                                fixedSize: Size.fromHeight(50.r)
+                            ),
+                            child: Row(
+
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.qr_code),
+                                SizedBox(width: 20.w,),
+                                const Text("View QR Code"),
+                              ],
+                            )),
+                      ),
+
 
 
 

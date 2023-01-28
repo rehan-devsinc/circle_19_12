@@ -130,9 +130,10 @@ class TagsController{
           else{
             skipUsers = getCommonTagUsers(matchedTag).map((e) => e).toList();
             await createRoom(skipUsers, matchedTag);
+            await markTagAsAnalyzedForOtherUsers(matchedTag, skipUsers);
           }
 
-          await markTagAsAnalyzed(matchedTag);
+          await markTagAsAnalyzedForMyUser(matchedTag);
 
         }
       }
@@ -142,6 +143,23 @@ class TagsController{
 
     return ;
 
+  }
+
+  ///remove if tag is analyzed
+  ///function not used yet
+  Future removeAnalyzedTag(String tag, types.User user) async{
+    Map<String,dynamic> metadata = user.metadata ?? {};
+
+    List<String> analyzedTags = ((metadata['analyzedTags'] ?? []) as List).map((e) => e.toString()).toList();
+    analyzedTags.removeWhere((element) => element==tag);
+    metadata['analyzedTags'] = analyzedTags;
+
+    await FirebaseFirestore.instance.collection('users').doc(myUser!.id).update(
+        {
+          'metadata' : metadata
+        }
+    );
+    print("remove analyzed tag function completed");
   }
 
   String? getTagIfExists(List<String> tags, String element){
@@ -236,7 +254,7 @@ class TagsController{
     return users;
   }
 
-  Future markTagAsAnalyzed(String tag) async{
+  Future markTagAsAnalyzedForMyUser(String tag) async{
 
     Map<String,dynamic> metadata = myUser!.metadata ?? {};
 
@@ -250,6 +268,32 @@ class TagsController{
         }
     );
   }
+
+
+  Future markTagAsAnalyzedForOtherUsers(String tag, List<types.User> otherUsersList) async{
+    for (var element in otherUsersList) {
+      await markTagAsAnalyzedForOtherUser(tag, element);
+    }
+
+  }
+
+
+
+  Future markTagAsAnalyzedForOtherUser(String tag, types.User otherUser) async{
+
+    Map<String,dynamic> metadata = otherUser.metadata ?? {};
+
+    List<String> analyzedTags = ((metadata['analyzedTags'] ?? []) as List).map((e) => e.toString()).toList();
+    analyzedTags.add(tag);
+    metadata['analyzedTags'] = analyzedTags;
+
+    await FirebaseFirestore.instance.collection('users').doc(otherUser.id).update(
+        {
+          'metadata' : metadata
+        }
+    );
+  }
+
 
   ///check if circle for this tag exists already
   Future<Map<String,dynamic>?> tagCircleExists(String tag) async{

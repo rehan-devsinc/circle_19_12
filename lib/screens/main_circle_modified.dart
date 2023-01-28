@@ -31,7 +31,10 @@ import 'google_maps_screen.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 
 class MainCircle extends StatefulWidget {
-  const MainCircle({Key? key}) : super(key: key);
+  const MainCircle({Key? key,  this.currentIndex = 0}) : super(key: key);
+
+  final int currentIndex ;
+
   @override
   State<MainCircle> createState() => MainCircleState();
 }
@@ -40,7 +43,6 @@ class MainCircleState extends State<MainCircle> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final GlobalKey<ScaffoldState> _scaffoldKey1 = new GlobalKey<ScaffoldState>();
 
-  int index = 0;
   @override
   State<MainCircle> createState() => MainCircleState();
 
@@ -74,6 +76,9 @@ class MainCircleState extends State<MainCircle> {
 
   @override
   void initState() {
+
+    _currentIndex = widget.currentIndex;
+
     if (FirebaseAuth.instance.currentUser == null) {
       print("current user is null");
       Get.offAll(() => const PhoneLoginScreen());
@@ -104,6 +109,14 @@ class MainCircleState extends State<MainCircle> {
             Get.to(const ViewRequestsPage());
           }
 
+          else if((message.notification?.title?.toLowerCase().contains("tag") ??
+              false) ||
+              (message.notification?.body?.toLowerCase().contains("tag") ??
+                  false)){
+            Get.to(()=>const RoomsPage());
+          }
+
+
           // if (message.data['_id'] != null) {
           //   Navigator.of(context).push(
           //     MaterialPageRoute(
@@ -133,6 +146,12 @@ class MainCircleState extends State<MainCircle> {
             print("contains invite word");
             Get.to(const ViewRequestsPage());
           }
+          else if((message.notification?.title?.toLowerCase().contains("tag") ??
+              false) ||
+              (message.notification?.body?.toLowerCase().contains("tag") ??
+                  false)){
+            Get.to(()=>const RoomsPage());
+          }
         }
       },
     );
@@ -150,6 +169,12 @@ class MainCircleState extends State<MainCircle> {
               (message.notification?.body?.toLowerCase().contains("invite") ??
                   false)) {
             Get.to(const ViewRequestsPage());
+          }
+          else if((message.notification?.title?.toLowerCase().contains("tag") ??
+              false) ||
+              (message.notification?.body?.toLowerCase().contains("tag") ??
+                  false)){
+            Get.to(()=>const RoomsPage());
           }
         }
       },
@@ -458,17 +483,19 @@ class MainCircleState extends State<MainCircle> {
                                       fixedSize: Size(130, 130),
                                       shape: CircleBorder(),
                                     ))),
-                                ElevatedButton(
+                                Flexible(
+                                  child: ElevatedButton(
 
-                                    ///VIEW CIRCLE INVITES REPLACEMENT
-                                    child: const Text("CIRCLES"),
-                                    onPressed: () {
-                                      Get.to(const CircleButtonScreens());
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      fixedSize: Size(100, 80),
-                                      shape: CircleBorder(),
-                                    )),
+                                      ///VIEW CIRCLE INVITES REPLACEMENT
+                                      child: const Text("CIRCLES"),
+                                      onPressed: () {
+                                        Get.to(const CircleButtonScreens());
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        fixedSize: Size(100, 80),
+                                        shape: CircleBorder(),
+                                      )),
+                                ),
                               ],
                             ),
                             SizedBox(
@@ -616,11 +643,11 @@ class MainCircleState extends State<MainCircle> {
 
   PreferredSizeWidget? _bottom() {
     return TabBar(
-      indicatorPadding: EdgeInsets.only(left: 20.0, right: 20.0),
-      labelColor: Colors.blueGrey,
-      unselectedLabelColor: Colors.white70,
+      indicatorPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
+      labelColor: Colors.white,
+      unselectedLabelColor: Colors.grey,
       indicator: const UnderlineTabIndicator(
-          borderSide: BorderSide(width: 2.0, color: Colors.black87),
+          borderSide: BorderSide(width: 2.0, color: Colors.blue),
           insets: EdgeInsets.symmetric(horizontal: 15.0)),
       automaticIndicatorColorAdjustment: true,
       labelStyle: const TextStyle(
