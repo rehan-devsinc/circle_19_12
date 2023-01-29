@@ -22,7 +22,8 @@ Map<String, String> globalRoomMap = {};
 class RoomsPage extends StatefulWidget {
   final bool secondVersion;
   final bool goToInfoPage;
-  const RoomsPage({this.secondVersion = false, this.goToInfoPage = false});
+  final bool hideLogout;
+  const RoomsPage({this.secondVersion = false, this.goToInfoPage = false, this.hideLogout = false});
 
   @override
   State<RoomsPage> createState() => _RoomsPageState();
@@ -62,6 +63,7 @@ class _RoomsPageState extends State<RoomsPage> {
       // backgroundColor: Colors.lightBlue,
       appBar: (!widget.secondVersion) ? AppBar(
         actions: [
+          if(!widget.hideLogout)
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: _user == null ? null : logout,
@@ -95,6 +97,7 @@ class _RoomsPageState extends State<RoomsPage> {
             icon: const Icon(Icons.arrow_back)),
         systemOverlayStyle: SystemUiOverlayStyle.light,
         title: const Text('Circles'),
+        centerTitle: true,
 
       ) : null,
       body: _user == null

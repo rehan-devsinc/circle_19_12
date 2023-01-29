@@ -22,6 +22,7 @@ class CircleButtonScreens extends StatelessWidget {
       appBar: AppBar(
         automaticallyImplyLeading: true,
         title: Text("Circles"),
+        centerTitle: true,
       ),
       body:   Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -49,7 +50,7 @@ class CircleButtonScreens extends StatelessWidget {
                   fixedSize: Size(150, 60)
               ),
               onPressed: () {
-                Get.to(const RoomsPage(goToInfoPage: true,));
+                Get.to(const RoomsPage(goToInfoPage: true,hideLogout: true,));
                 // viewMyCircles(context);
               }),
           SizedBox(height: height,),
