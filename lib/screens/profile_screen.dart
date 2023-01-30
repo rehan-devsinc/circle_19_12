@@ -322,9 +322,15 @@ class ProfileScreen extends StatelessWidget {
                       fontStyle: FontStyle.italic)),
           ],
         ),
+        10.verticalSpace,
+        Padding(
+          padding:  EdgeInsets.only(left: 0.w,right: 40.w),
+          child: Text("We will connect you with relevant circles based on your favourite tags.", style: TextStyle(color: Colors.grey[700]),),
+        ),
+        5.verticalSpace,
         if (myTags.isNotEmpty)
           Padding(
-            padding: EdgeInsets.only(right: 40.w, top: 10.h),
+            padding: EdgeInsets.only(right: 50.w, top: 10.h),
             child: SizedBox(
               width: Get.width,
               child: Wrap(
@@ -339,8 +345,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
           ),
-        10.verticalSpace,
-        Text("We will connect you with relevant circles based on your favourite tags.", style: TextStyle(color: Colors.grey[700]),),
+        20.verticalSpace,
 
       ],
     );

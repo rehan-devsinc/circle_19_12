@@ -8,31 +8,37 @@ class LocalNotificationService{
 
   static void initialize() {
     // initializationSettings  for Android
-    const InitializationSettings initializationSettings =
-    InitializationSettings(
-      android: AndroidInitializationSettings("@mipmap/ic_launcher"),
-      iOS: IOSInitializationSettings()
+     InitializationSettings initializationSettings =
+    const InitializationSettings(
+      android: AndroidInitializationSettings("@mipmap/ic_launcher",),
+      iOS: DarwinInitializationSettings(
+        onDidReceiveLocalNotification: onDidReceiveLocalNotification,
+      ),
+
     );
 
     _notificationsPlugin.initialize(
       initializationSettings,
-      onSelectNotification: (String? id) async {
-        print("onSelectNotification");
-        if (id!.isNotEmpty) {
-          print("Router Value1234 $id");
-
-          // Navigator.of(context).push(
-          //   MaterialPageRoute(
-          //     builder: (context) => DemoScreen(
-          //       id: id,
-          //     ),
-          //   ),
-          // );
-        }
+      onDidReceiveNotificationResponse: (NotificationResponse notificationResponse) async {
+        print("onDidReceiveNotificationResponse in initializing settings");
+        print("notification id: ${notificationResponse.id}");
+        print("notification input: ${notificationResponse.input}");
       },
+
+
     );
   }
 
+  static void onDidReceiveLocalNotification(
+      int id, String? title, String? body, String? payload) async {
+    // display a dialog with the notification details, tap ok to go to another page
+    print("into on did receive local notification");
+    print("notification id: $id");
+    print("notification title: $title");
+    print("notification title: $body");
+
+
+  }
 
   static void createanddisplaynotification(RemoteMessage message) async{
     print("into create and display");

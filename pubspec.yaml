@@ -32,10 +32,10 @@ dependencies:
   firebase_core: ^1.0.4
   firebase_auth: any
   flutter_chat_ui: ^1.6.6
-  file_picker: ^4.6.1
+  file_picker: ^5.2.5
   image_picker: ^0.8.5+3
   mime: ^1.0.2
-  open_file: ^3.2.1
+#  open_file: ^3.2.1
   uuid: ^3.0.6
   flutter_firebase_chat_core: ^1.6.2
   firebase_storage: any
@@ -53,7 +53,7 @@ dependencies:
   pin_code_fields: ^7.4.0
   toast: ^0.2.9
   firebase_messaging: ^12.0.1
-  flutter_local_notifications: ^9.7.0
+  flutter_local_notifications: ^13.0.0
   http: ^0.13.5
   permission_handler: ^10.0.0
   flutter_contacts: ^1.1.5
@@ -70,6 +70,8 @@ dependencies:
   timeago: ^3.3.0
   cached_network_image: ^3.2.3
   qr_flutter: ^4.0.0
+  open_filex: ^4.3.2
+
 
 
 

@@ -17,7 +17,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
-import 'package:open_file/open_file.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../circle_members.dart';
@@ -501,7 +501,8 @@ class _ChatPageState extends State<ChatPage> {
         }
       }
 
-      await OpenFile.open(localPath);
+
+      await OpenFilex.open(localPath);
     }
   }
 
