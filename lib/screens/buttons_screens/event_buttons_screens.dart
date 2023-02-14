@@ -29,7 +29,7 @@ class EventButtonsScreen extends StatelessWidget {
           ElevatedButton(
               child: const Text("Create new Event", style: TextStyle(),textAlign: TextAlign.center),
               style: ElevatedButton.styleFrom(
-                  fixedSize: const Size(150, 60)
+                  fixedSize: const Size(170, 60)
               ),
               onPressed: () {
                 Navigator.push(
@@ -46,7 +46,7 @@ class EventButtonsScreen extends StatelessWidget {
         ///VIEW CIRCLE INVITES REPLACEMENT
           child: const Text("View Events", style: TextStyle(fontSize: 15),textAlign: TextAlign.center,),
               style: ElevatedButton.styleFrom(
-                  fixedSize: const Size(150, 60)
+                  fixedSize: const Size(170, 60)
               ),
           onPressed: () {
             Get.to(CalendarListEventsScreen(circleId: 'global',));
@@ -67,7 +67,7 @@ class EventButtonsScreen extends StatelessWidget {
                   return ElevatedButton(
                       child: const Text("Event Invites", textAlign: TextAlign.center),
                       style: ElevatedButton.styleFrom(
-                          fixedSize: const Size(150, 60)
+                          fixedSize: const Size(170, 60)
                       ),
                       onPressed: () {
                         Navigator.push(
@@ -115,7 +115,7 @@ class EventButtonsScreen extends StatelessWidget {
 
                     },
                     style: ElevatedButton.styleFrom(
-                        fixedSize: const Size(150, 60)
+                        fixedSize: const Size(170, 60)
                     )
 
                 );

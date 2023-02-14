@@ -31,7 +31,7 @@ class CircleButtonScreens extends StatelessWidget {
           ElevatedButton(
               child: const Text("Create new Circle", style: TextStyle(),textAlign: TextAlign.center),
               style: ElevatedButton.styleFrom(
-                fixedSize: Size(150, 60)
+                fixedSize: Size(170, 60)
               ),
               onPressed: () {
                 Navigator.push(
@@ -47,7 +47,7 @@ class CircleButtonScreens extends StatelessWidget {
               child: const Text("View My Circles"),
               style: ElevatedButton.styleFrom(
                   // shape: CircleBorder(side: BorderSide(color: Colors.white)),
-                  fixedSize: Size(150, 60)
+                  fixedSize: Size(170, 60)
               ),
               onPressed: () {
                 Get.to(const RoomsPage(goToInfoPage: true,hideLogout: true, appBarTitle: "Circles",));
@@ -59,7 +59,7 @@ class CircleButtonScreens extends StatelessWidget {
               child: const Text("View All Circles"),
               style: ElevatedButton.styleFrom(
                 // shape: CircleBorder(side: BorderSide(color: Colors.white)),
-                  fixedSize: Size(150, 60)
+                  fixedSize: Size(170, 60)
               ),
 
               onPressed: () {
@@ -72,7 +72,7 @@ class CircleButtonScreens extends StatelessWidget {
               child: const Text("  Join a Circle  "),
               style: ElevatedButton.styleFrom(
                 // shape: CircleBorder(side: BorderSide(color: Colors.white)),
-                  fixedSize: Size(150, 60)
+                  fixedSize: Size(170, 60)
               ),
 
               onPressed: () async{
@@ -98,7 +98,7 @@ class CircleButtonScreens extends StatelessWidget {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                          fixedSize: const Size(150, 60)
+                          fixedSize: const Size(170, 60)
                       )
                   );
                 }
@@ -144,7 +144,7 @@ class CircleButtonScreens extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                        fixedSize: const Size(150, 60)
+                        fixedSize: const Size(170, 60)
                     )
                 );
               }
