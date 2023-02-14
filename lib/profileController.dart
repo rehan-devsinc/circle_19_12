@@ -32,34 +32,11 @@ class ProfileController extends GetxController{
   }
 
 
-  Future<void> saveInfo({required String hobby, required String music, required String band, required String book, required String imageUrl , bool createIt = false, required Map metadata }) async{
+  Future<void> saveInfo({ required String imageUrl , required Map metadata }) async{
     loading.value = true;
     try{
       print("picked file is ${pickedFile?.path}");
 
-      if(createIt){
-        String fcmToken = await DBOperations.getDeviceTokenToSendNotification();
-        List<String> tokenList = [fcmToken];
-        await FirebaseChatCore.instance.createUserInFirestore(
-          types.User(
-              firstName: hobby,
-              id: FirebaseAuth.instance.currentUser!.uid,
-              imageUrl: (pickedFile != null) ? (await uploadImageAndGetUrl()) : imageUrl,
-              lastName: music,
-              metadata: {
-                "fcmTokens":tokenList
-              }
-          ),
-        );
-
-        Get.to(const MainCircle());
-      }
-
-      else{
-        metadata['fvrtHobby'] = hobby;
-        metadata['fvrtMusic'] = music;
-        metadata['fvrtBook'] = book;
-        metadata['fvrtBand'] = band;
 
     await FirebaseFirestore.instance
             .collection('users')
@@ -69,7 +46,7 @@ class ProfileController extends GetxController{
           'metadata': metadata
         });
         Get.back();
-      }
+
       Get.snackbar("Success", "Info saved", backgroundColor: Colors.white);
     }
     catch(e){

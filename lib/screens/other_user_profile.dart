@@ -10,6 +10,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../enums/favourites_category.dart';
 import '../userinfo.dart';
 import 'chat_core/chat.dart';
 
@@ -29,10 +30,13 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
   bool locationLoading = false;
   bool isFriend = false;
 
-  TextEditingController hobbyController = TextEditingController();
-  TextEditingController musicController = TextEditingController();
-  TextEditingController bookController = TextEditingController();
-  TextEditingController bandController = TextEditingController();
+  List<String> fvrtHobbies = [];
+  List<String> fvrtMusics = [];
+  List<String> fvrtBooks = [];
+  List<String> fvrtBands = [];
+  Map<String,dynamic> favoritesMap = {};
+
+
 
   @override
   initState() {
@@ -46,10 +50,13 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
     double paddingRes30 = Get.width * 0.070093;
     Map metadata = widget.otherUser.metadata!;
 
-    hobbyController.text = metadata['fvrtHobby'] ?? "";
-    musicController.text = metadata['fvrtMusic'] ?? "";
-    bandController.text = metadata['fvrtBand'] ?? "";
-    bookController.text = metadata['fvrtBook'] ?? "";
+    if(metadata['favorites']!=null){
+      favoritesMap = metadata['favorites'];
+      fvrtBands = ((favoritesMap[FavouritesCategory.bands.toString()] ?? []) as List).map((e) => e.toString()).toList();
+      fvrtBooks = ((favoritesMap[FavouritesCategory.books.toString()] ?? []) as List).map((e) => e.toString()).toList();
+      fvrtHobbies = ((favoritesMap[FavouritesCategory.hobbies.toString()] ?? []) as List).map((e) => e.toString()).toList();
+      fvrtMusics = ((favoritesMap[FavouritesCategory.musics.toString()] ?? []) as List).map((e) => e.toString()).toList();
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('User Profile')),
@@ -189,8 +196,8 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                         Row(
                           children: [
                             const Text(
-                              "User Id:",
-                              style: TextStyle(fontSize: 20),
+                              "id",
+                              style: TextStyle(fontSize: 18),
                             ),
                             const SizedBox(
                               width: 10,
@@ -201,6 +208,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
+                                fontStyle: FontStyle.italic
                               ),
                               textAlign: TextAlign.center,
                             )),
@@ -232,43 +240,20 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
             const SizedBox(
               height: 10,
             ),
+
             Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: paddingRes30, vertical: 8),
-              child: _buildCustomTextField(
-                "Favourite Hobby",
-                hobbyController,
-                readOnly: true,
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  buildSingleFavouritesSection(context, fvrtHobbies, "Favourite Hobbies", FavouritesCategory.hobbies, 'Hobby'),
+                  buildSingleFavouritesSection(context, fvrtBooks, "Favourite Books", FavouritesCategory.books, 'book'),
+                  buildSingleFavouritesSection(context, fvrtMusics, "Favourite Music", FavouritesCategory.musics, 'music'),
+                  buildSingleFavouritesSection(context, fvrtBands, "Favourite Bands", FavouritesCategory.bands, 'band'),
+                ],
               ),
             ),
-            Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: paddingRes30, vertical: 8),
-              child: _buildCustomTextField(
-                "Favourite Music",
-                musicController,
-                readOnly: false,
-              ),
-            ),
-            // ///TODO REPLACE EMAIL
-            Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: paddingRes30, vertical: 8),
-              child: _buildCustomTextField(
-                "Favourite Band",
-                bandController,
-                readOnly: false,
-              ),
-            ),
-            Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: paddingRes30, vertical: 8),
-              child: _buildCustomTextField(
-                "Favourite Book",
-                bookController,
-                readOnly: false,
-              ),
-            ),
+
 
             const SizedBox(
               height: 20,
@@ -284,37 +269,65 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
     );
   }
 
-  Widget _buildCustomTextField(
-    String hintText,
-    TextEditingController textEditingController, {
-    bool readOnly = true,
-  }) {
-    return TextFormField(
-      controller: textEditingController,
-      readOnly: true,
-      decoration: InputDecoration(
-        hintText: hintText,
-        labelText: hintText,
-        hintStyle: const TextStyle(color: Colors.black),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
-        enabledBorder:
-            OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
-        focusedBorder:
-            OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
-        disabledBorder:
-            OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+  Widget buildSingleFavouritesSection(BuildContext context,List<String> favourites,String title,FavouritesCategory category,String miniTitle){
+    return Padding(
+      padding:  EdgeInsets.only(bottom: 15.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(title,style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),),
+            ],
+          ),
+          10.verticalSpace,
+          if(favourites.isEmpty) const Text("NONE",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                  fontStyle: FontStyle.normal)) ,
+          Wrap(
+            alignment: WrapAlignment.start,
+            // runAlignment: WrapAlignment.start,
+            // crossAxisAlignment: WrapCrossAlignment.start,
+            runSpacing: 10.h,
+            spacing: 12.w,
+            children: [
+              for (var i in favourites) _buildSingleFavouriteItem(i,context,category,favourites,),
+            ],
+          )
 
-        // isDense: true,
-        filled: true,
-        contentPadding: const EdgeInsets.only(top: 5, left: 25),
-        fillColor: Colors.white,
+
+
+        ],
       ),
-      style: const TextStyle(
-        color: Colors.black,
-      ),
-      cursorColor: Colors.black,
     );
   }
+
+  Widget _buildSingleFavouriteItem(String item, BuildContext context,
+      FavouritesCategory category, List<String> favorites,
+      {void Function()? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              item,
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.normal),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+            color: Colors.deepOrange, borderRadius: BorderRadius.circular(5.r)),
+      ),
+    );
+  }
+
 
   Future<void> _handlePressed(BuildContext context) async {
     setState(() {

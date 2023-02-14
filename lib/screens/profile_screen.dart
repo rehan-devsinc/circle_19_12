@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:circle/controllers/tags_matching_controller.dart';
+import 'package:circle/enums/favourites_category.dart';
 import 'package:circle/phone_login/collect_user_info.dart';
 import 'package:circle/profileController.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,14 +19,16 @@ class ProfileScreen extends StatelessWidget {
 
   ProfileController profileController = ProfileController();
 
-  TextEditingController hobbyController = TextEditingController();
-  TextEditingController musicController = TextEditingController();
-  TextEditingController bookController = TextEditingController();
-  TextEditingController bandController = TextEditingController();
+  List<String> fvrtHobbies = [];
+  List<String> fvrtMusics = [];
+  List<String> fvrtBooks = [];
+  List<String> fvrtBands = [];
+
 
   TagsController tagsController = TagsController();
 
   Map metadata = {};
+  Map<String,dynamic> favoritesMap = {};
   List<String> myTags = [];
 
   @override
@@ -56,12 +59,15 @@ class ProfileScreen extends StatelessWidget {
 
           metadata = userMap['metadata'] ?? {};
 
-          hobbyController.text = metadata['fvrtHobby'] ?? "";
-          musicController.text = metadata['fvrtMusic'] ?? "";
-          bandController.text = metadata['fvrtBand'] ?? "";
-          bookController.text = metadata['fvrtBook'] ?? "";
-          // passwordController.text = userMap['firstName'];
-          // emailController.text = FirebaseAuth.instance.currentUser!.email;
+          if(metadata['favorites']!=null){
+            favoritesMap = metadata['favorites'];
+            fvrtBands = ((favoritesMap[FavouritesCategory.bands.toString()] ?? []) as List).map((e) => e.toString()).toList();
+            fvrtBooks = ((favoritesMap[FavouritesCategory.books.toString()] ?? []) as List).map((e) => e.toString()).toList();
+            fvrtHobbies = ((favoritesMap[FavouritesCategory.hobbies.toString()] ?? []) as List).map((e) => e.toString()).toList();
+            fvrtMusics = ((favoritesMap[FavouritesCategory.musics.toString()] ?? []) as List).map((e) => e.toString()).toList();
+
+          }
+
 
           print(userMap);
           if (userMap['metadata'] == null) {
@@ -91,11 +97,7 @@ class ProfileScreen extends StatelessWidget {
                                 backgroundColor: Colors.pink),
                             onPressed: () async {
                               profileController.saveInfo(
-                                  hobby: hobbyController.text,
-                                  music: musicController.text,
                                   imageUrl: userMap['imageUrl'],
-                                  book: bookController.text,
-                                  band: bandController.text,
                                   metadata: metadata);
                             },
                             child: const Text('Save')),
@@ -162,12 +164,12 @@ class ProfileScreen extends StatelessWidget {
                                 children: [
                                   Row(
                                     children: [
-                                      const Text(
-                                        "User Id:",
-                                        style: TextStyle(fontSize: 20),
+                                      Text("id: ",
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+
                                       ),
-                                      const SizedBox(
-                                        width: 10,
                                       ),
                                       Expanded(
                                           child: Text(
@@ -175,6 +177,7 @@ class ProfileScreen extends StatelessWidget {
                                         style: const TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
+                                          fontStyle: FontStyle.italic,
                                         ),
                                         textAlign: TextAlign.center,
                                       )),
@@ -208,35 +211,40 @@ class ProfileScreen extends StatelessWidget {
                       SizedBox(
                         height: 30,
                       ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: paddingRes30, vertical: 8),
-                        child: _buildCustomTextField("Favourite Hobby",
-                            readOnly: false,
-                            textEditingController: hobbyController),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: paddingRes30, vertical: 8),
-                        child: _buildCustomTextField("Favourite Music",
-                            readOnly: false,
-                            textEditingController: musicController),
-                      ),
-                      // ///TODO REPLACE EMAIL
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: paddingRes30, vertical: 8),
-                        child: _buildCustomTextField("Favourite Band",
-                            readOnly: false,
-                            textEditingController: bandController),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: paddingRes30, vertical: 8),
-                        child: _buildCustomTextField("Favourite Book",
-                            readOnly: false,
-                            textEditingController: bookController),
-                      ),
+                      
+                      buildSingleFavouritesSection(context, fvrtHobbies, "Favourite Hobbies", FavouritesCategory.hobbies, 'Hobby'),
+                      buildSingleFavouritesSection(context, fvrtBooks, "Favourite Books", FavouritesCategory.books, 'book'),
+                      buildSingleFavouritesSection(context, fvrtMusics, "Favourite Music", FavouritesCategory.musics, 'music'),
+                      buildSingleFavouritesSection(context, fvrtBands, "Favourite Bands", FavouritesCategory.bands, 'band'),
+
+                      // Padding(
+                      //   padding: EdgeInsets.symmetric(
+                      //       horizontal: paddingRes30, vertical: 8),
+                      //   child: _buildCustomTextField("Favourite Hobby",
+                      //       readOnly: false,
+                      //       textEditingController: hobbyController),
+                      // ),
+                      // Padding(
+                      //   padding: EdgeInsets.symmetric(
+                      //       horizontal: paddingRes30, vertical: 8),
+                      //   child: _buildCustomTextField("Favourite Music",
+                      //       readOnly: false,
+                      //       textEditingController: musicController),
+                      // ),
+                      // Padding(
+                      //   padding: EdgeInsets.symmetric(
+                      //       horizontal: paddingRes30, vertical: 8),
+                      //   child: _buildCustomTextField("Favourite Band",
+                      //       readOnly: false,
+                      //       textEditingController: bandController),
+                      // ),
+                      // Padding(
+                      //   padding: EdgeInsets.symmetric(
+                      //       horizontal: paddingRes30, vertical: 8),
+                      //   child: _buildCustomTextField("Favourite Book",
+                      //       readOnly: false,
+                      //       textEditingController: bookController),
+                      // ),
 
                       const SizedBox(
                         height: 20,
@@ -249,7 +257,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-            floatingActionButton: Column(
+            floatingActionButton: true ? null :  Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 FloatingActionButton(
@@ -276,48 +284,79 @@ class ProfileScreen extends StatelessWidget {
           );
         });
   }
+  
+  Widget buildSingleFavouritesSection(BuildContext context,List<String> favourites,String title,FavouritesCategory category,String miniTitle){
+    return Padding(
+      padding:  EdgeInsets.only(bottom: 15.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(title,style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),),
+              InkWell(
+                  onTap: ()async{
+                    await insertFavourite(context, category, favourites, miniTitle);
+                  },
+                  child: Icon(Icons.add_circle, color: Colors.pink,size: 30,)),
+            ],
+          ),
+          10.verticalSpace,
+          if(favourites.isEmpty) const Text("NONE",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                  fontStyle: FontStyle.normal)) ,
+          Wrap(
+            alignment: WrapAlignment.start,
+            // runAlignment: WrapAlignment.start,
+            // crossAxisAlignment: WrapCrossAlignment.start,
+            runSpacing: 10.h,
+            spacing: 12.w,
+            children: [
+              for (var i in favourites) _buildSingleFavouriteItem(i,context,category,favourites,deleteIcon: true,),
+            ],
+          )
 
-  Widget _buildCustomTextField(String hintText,
-      {bool readOnly = false,
-      required TextEditingController textEditingController}) {
-    return TextFormField(
-      controller: textEditingController,
-      readOnly: readOnly,
-      decoration: InputDecoration(
-        hintText: hintText,
-        labelText: hintText,
-        hintStyle: const TextStyle(color: Colors.black),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)
-            // borderSide: const BorderSide(color: darkMain, ),
-            // borderRadius: BorderRadius.circular(30),
-            ),
-        enabledBorder:
-            OutlineInputBorder(borderRadius: BorderRadius.circular(30)
-                // borderSide: const BorderSide(color: darkMain, ),
-                // borderRadius: BorderRadius.circular(30),
-                ),
-        focusedBorder:
-            OutlineInputBorder(borderRadius: BorderRadius.circular(30)
-                // borderSide: const BorderSide(color: darkMain, ),
-                // borderRadius: BorderRadius.circular(30),
-                ),
-        disabledBorder:
-            OutlineInputBorder(borderRadius: BorderRadius.circular(30)
-                // borderSide: const BorderSide(color: darkMain, ),
-                // borderRadius: BorderRadius.circular(30),
-                ),
 
-        // isDense: true,
-        filled: true,
-        contentPadding: const EdgeInsets.only(top: 5, left: 25),
-        fillColor: Colors.white,
+
+        ],
       ),
-      style: const TextStyle(
-        color: Colors.black,
-      ),
-      cursorColor: Colors.black,
     );
   }
+  Widget _buildSingleFavouriteItem(String item, BuildContext context,
+      FavouritesCategory category, List<String> favorites,
+      {bool deleteIcon = true,void Function()? onTap}) {
+    return InkWell(
+      onTap: deleteIcon ? ()async{
+        await deleteFavouriteItem(context, item, category, favorites);
+      } : onTap,
+      child: Container(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              item,
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.normal),
+            ),
+            if(deleteIcon)
+              ...[ 5.horizontalSpace,
+                Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 16.r,
+                )]
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+            color: Colors.deepOrange, borderRadius: BorderRadius.circular(5.r)),
+      ),
+    );
+  }
+
 
   Widget _buildTagsPortion(List<String> myTags, BuildContext context) {
     return Column(
@@ -335,6 +374,12 @@ class ProfileScreen extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       color: Colors.grey,
                       fontStyle: FontStyle.italic)),
+            Spacer(),
+            InkWell(
+                onTap: ()async{
+                  await insertTag(context);
+                },
+                child: Icon(Icons.add_circle, color: Colors.pink,size: 30,))
           ],
         ),
         10.verticalSpace,
@@ -365,6 +410,8 @@ class ProfileScreen extends StatelessWidget {
       ],
     );
   }
+
+
 
   Widget _buildSingleTag(String tag, BuildContext context,
       {bool deleteIcon = true,void Function()? onTap}) {
@@ -485,6 +532,127 @@ class ProfileScreen extends StatelessWidget {
               ],
             ));
   }
+
+  Future insertFavourite(BuildContext context,FavouritesCategory category, List<String> favourites,String title) async {
+    TextEditingController nameController = TextEditingController();
+
+
+    await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title:  Text('Enter new $title'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("Cancel")),
+
+            // 5.horizontalSpace,
+
+            ElevatedButton(
+              onPressed: () async {
+
+                if (nameController.text.trim().isEmpty) {
+                  Get.snackbar("Error", "Title can't be empty",
+                      backgroundColor: Colors.white);
+                  return;
+                } else if (favourites
+                    .any((e) =>e.toLowerCase() ==nameController.text.toLowerCase())) {
+                  Get.snackbar("Error", "Favourite already exists",
+                      backgroundColor: Colors.white
+                  );
+                  return;
+                }
+
+                try {
+                  favourites.add(nameController.text);
+
+                  favoritesMap[category.toString()] = favourites;
+                  metadata['favorites'] = favoritesMap;
+
+                  FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(FirebaseAuth.instance.currentUser!.uid)
+                      .update({'metadata': metadata});
+                  
+                } catch (e) {
+                  print(e);
+                }
+
+                Navigator.pop(context);
+              },
+              style:
+              ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              child: const Text(
+                "Add",
+                // style: TextStyle(color: Colors.green),
+              ),
+            )
+          ],
+        ));
+  }
+  
+  Future deleteFavouriteItem(BuildContext context, String item,FavouritesCategory category, List<String> favorites) async {
+
+    await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title:  Text("Delete '$item'"),
+          content: const Text("Are you sure you want to remove this from favourites?"),
+          actions: [
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("Cancel")),
+
+            // 5.horizontalSpace,
+
+            ElevatedButton(
+              onPressed: () async {
+                
+                try {
+                  favorites.removeWhere((element) => element==(item));
+                  
+                  favoritesMap[category.toString()] = favorites;
+                  metadata['favorites'] = favoritesMap;
+
+                  FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(FirebaseAuth.instance.currentUser!.uid)
+                      .update({'metadata': metadata});
+                } catch (e) {
+                  print(e);
+                }
+
+                Navigator.pop(context);
+              },
+              style:
+              ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: const Text(
+                "Confirm",
+                // style: TextStyle(color: Colors.green),
+              ),
+            )
+          ],
+        ));
+  }
+
 
   Future deleteTag(BuildContext context, String tag) async {
 
