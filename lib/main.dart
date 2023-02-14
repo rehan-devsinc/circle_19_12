@@ -30,7 +30,7 @@ void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  FirebaseMessaging.instance.requestPermission();
+  await FirebaseMessaging.instance.requestPermission();
   FirebaseMessaging.onBackgroundMessage(backgroundHandler);
   LocalNotificationService.initialize();
   await DBOperations.handleNotificationPermissions();

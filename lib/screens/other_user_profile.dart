@@ -1,4 +1,5 @@
 import 'package:circle/screens/google_maps_screen.dart';
+import 'package:circle/screens/other_user_circles.dart';
 import 'package:circle/utils/profile_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -74,6 +75,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
+
                   onPressed: () async {
                     await _handlePressed(context);
                   },
@@ -82,7 +84,9 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                           color: Colors.white,
                         )
                       : const Text("Chat"),
-                  style: ElevatedButton.styleFrom(fixedSize: Size(100, 40)),
+                  style: ElevatedButton.styleFrom(
+                      fixedSize: const Size(150, 40)
+                  ),
                 ),
                 // SizedBox(width: 20,),
                 ElevatedButton(
@@ -112,36 +116,56 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                         )
                       : Text(!(isFriend) ? "Add Friend" : "Unfriend"),
                   style: ElevatedButton.styleFrom(
-                      fixedSize: const Size(100, 40),
+                      fixedSize: const Size(150, 40),
                       backgroundColor: !(isFriend) ? Colors.green : Colors.red),
                 )
               ],
             ),
             const SizedBox(
-              height: 20,
+              height: 0,
             ),
 
-            ElevatedButton(
-              onPressed: () async {
-              Map metadata =   widget.otherUser.metadata ?? {};
-              if(metadata['locationSharing'] ?? false){
-                _onLocationPressed();
-              }
-              else{
-                Get.snackbar("Request Denies", "User has disabled his location sharing");
-              }
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                  Map metadata =   widget.otherUser.metadata ?? {};
+                  if(metadata['locationSharing'] ?? false){
+                    _onLocationPressed();
+                  }
+                  else{
+                    Get.snackbar("Request Denied", "User has disabled his location sharing");
+                  }
 
 
-              },
-              child: locationLoading
-                  ? const CircularProgressIndicator(
-                color: Colors.white,
+                  },
+                  child: locationLoading
+                      ? const CircularProgressIndicator(
+                    color: Colors.white,
 
-              )
-                  : const Text( "View Location" ),
-              style: ElevatedButton.styleFrom(
-                  fixedSize: const Size(150, 40),
-                  backgroundColor:  Colors.pink),
+                  )
+                      : const Text( "View Location" ),
+                  style: ElevatedButton.styleFrom(
+                      fixedSize: const Size(150, 40),
+                      backgroundColor:  Colors.pink),
+                ),
+                ElevatedButton(
+                    child: const Text("User Circles",
+                        textAlign: TextAlign.center),
+                    onPressed: () {
+                      Get.to(()=>OtherUserCircles(user: widget.otherUser));
+                    },
+                  style: ElevatedButton.styleFrom(
+                      fixedSize: const Size(150, 40)
+                  ),
+
+
+                )
+
+
+                ,
+              ],
             ),
             const SizedBox(height: 20,),
 

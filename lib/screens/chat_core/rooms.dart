@@ -23,7 +23,8 @@ class RoomsPage extends StatefulWidget {
   final bool secondVersion;
   final bool goToInfoPage;
   final bool hideLogout;
-  const RoomsPage({this.secondVersion = false, this.goToInfoPage = false, this.hideLogout = false});
+  final String? appBarTitle;
+  const RoomsPage({this.secondVersion = false, this.goToInfoPage = false, this.hideLogout = false, this.appBarTitle});
 
   @override
   State<RoomsPage> createState() => _RoomsPageState();
@@ -96,7 +97,7 @@ class _RoomsPageState extends State<RoomsPage> {
               },
             icon: const Icon(Icons.arrow_back)),
         systemOverlayStyle: SystemUiOverlayStyle.light,
-        title: const Text('Circles'),
+        title:  Text(widget.appBarTitle ?? 'Circles'),
         centerTitle: true,
 
       ) : null,
@@ -161,8 +162,12 @@ class _RoomsPageState extends State<RoomsPage> {
                       muted = true;
                     }
 
+                    if(room.type!=types.RoomType.group){
+                      return SizedBox();
+                    }
 
-                    if((room.metadata == null) || (room.metadata!["isChildCircle"] == null) || (room.metadata!["isChildCircle"] == false) ){
+                    ///confirming its not child circle
+                    if((room.metadata == null) || (room.metadata!["isChildCircle"] == null) || (room.metadata!["isChildCircle"] == false)  ){
                       return InkWell(
                         onTap: () {
 

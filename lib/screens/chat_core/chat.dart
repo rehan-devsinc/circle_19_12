@@ -1,13 +1,16 @@
 import 'dart:io';
 
+import 'package:circle/models/post_model.dart';
 import 'package:circle/screens/chat_core/group_info.dart';
 import 'package:circle/screens/other_user_profile.dart';
+import 'package:circle/screens/posts/view_post_screen.dart';
 import 'package:circle/userinfo.dart';
 import 'package:circle/utils/db_operations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -19,6 +22,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../circle_members.dart';
 
@@ -123,14 +127,14 @@ class _ChatPageState extends State<ChatPage> {
                         scrollDirection: Axis.horizontal,
                         padding: EdgeInsets.zero,
                           shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
+                          physics: const NeverScrollableScrollPhysics(),
                           itemCount: widget.room.users.length > 2 ? 3 : widget.room.users.length ,
                           itemBuilder: (context,index){
                           return userImageAvatar(widget.room.users[index].imageUrl!);
                           }),
                     ),
-                    SizedBox(height: 3,),
-                    Text("View all members ->", style: TextStyle(fontSize: 12, color: Colors.black),)
+                    const SizedBox(height: 3,),
+                    const Text("View all members ->", style: TextStyle(fontSize: 12, color: Colors.black),)
                   ],
                 )
 
@@ -207,6 +211,7 @@ class _ChatPageState extends State<ChatPage> {
               return false;
             } );
 
+
             print("after removing:");
             print(messages.any((element) {
               if (element.type==(types.MessageType.text)){
@@ -219,7 +224,24 @@ class _ChatPageState extends State<ChatPage> {
 
 
             return Chat(
-              theme: DefaultChatTheme(primaryColor: Colors.black87),
+              textMessageOptions: TextMessageOptions(
+                isTextSelectable: false,
+
+                onLinkPressed:true? null : (String link)async{
+                  try {
+                  if (!await launchUrl(Uri.parse(link),mode: LaunchMode.externalApplication)) {
+                    throw throw Exception('Could not launch $link');
+                  }
+                }
+                catch(e){
+                    if (kDebugMode) {
+                      print(e.toString());
+                    }
+                }
+              }
+              ),
+              onMessageDoubleTap: _handleMessageTap,
+              theme: const DefaultChatTheme(primaryColor: Colors.black87),
               showUserAvatars: true,
               showUserNames: true,
               isAttachmentUploading: _isAttachmentUploading,
@@ -254,26 +276,29 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           SizedBox(width: 20,),
           Expanded(
-            child: TextFormField(
-              controller: inputMessageController,
-              decoration: InputDecoration(
-                hintText: "Message",
-                suffixIcon: InkWell(
-                  onTap: (){
-                    _handleAtachmentPressed();
-                  },
-                    child: Icon(Icons.add_circle_outline, color: Colors.purple,)),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20)
-                ),
-                border: OutlineInputBorder(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: TextFormField(
+                controller: inputMessageController,
+                decoration: InputDecoration(
+                  hintText: "Message",
+                  suffixIcon: InkWell(
+                    onTap: (){
+                      _handleAtachmentPressed();
+                    },
+                      child: Icon(Icons.add_circle_outline, color: Colors.purple,)),
+                  enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20)
-                ),
-                disabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20)
-                ),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20)
+                  ),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20)
+                  ),
+                  disabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20)
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20)
+                  ),
                 ),
               ),
             ),
@@ -471,7 +496,11 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _handleMessageTap(BuildContext _, types.Message message) async {
+   print("into handle message tap");
+//   if (message is types.Cu)
     if (message is types.FileMessage) {
+      print("message type is file message");
+
       var localPath = message.uri;
 
       if (message.uri.startsWith('http')) {
@@ -503,6 +532,13 @@ class _ChatPageState extends State<ChatPage> {
 
 
       await OpenFilex.open(localPath);
+    }
+    else if ((message.metadata ?? {})['post'] != null){
+      PostModel postModel = PostModel.fromJson(message.metadata!['post']);
+      Get.to(()=>ViewPostScreen(postModel: postModel));
+    }
+    else{
+      print("message type is not file message, returning");
     }
   }
 
@@ -567,56 +603,6 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       _isAttachmentUploading = uploading;
     });
-  }
-
-  Widget  _buildCustomBottomWidget1(){
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0, left: 16, right: 16),
-      child: Row(
-        children: [
-          SizedBox(width: 20,),
-          Expanded(
-            child: SizedBox(
-              height: 48,
-              child: TextFormField(
-                decoration:  InputDecoration(
-                  contentPadding: EdgeInsets.only(left: 16),
-                  filled: true,
-                  hintText: "Message",
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6),
-                    borderSide: const BorderSide(width: 0, color: Colors.transparent),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6),
-                    borderSide: const BorderSide(width: 0, color: Colors.transparent),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 15,),
-          InkWell(
-              onTap: (){
-                _handleSendPressed(types.PartialText(text: inputMessageController.text ));
-              },
-              child: Container(
-                padding: EdgeInsets.all(14),
-                height: 48,
-                width: 48,
-                decoration:  BoxDecoration(
-
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Icon(Icons.send),
-
-              )),
-          SizedBox(width: 20,),
-
-        ],
-      ),
-    );
-
   }
 
 }

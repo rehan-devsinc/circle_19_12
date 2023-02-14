@@ -50,7 +50,7 @@ class CircleButtonScreens extends StatelessWidget {
                   fixedSize: Size(150, 60)
               ),
               onPressed: () {
-                Get.to(const RoomsPage(goToInfoPage: true,hideLogout: true,));
+                Get.to(const RoomsPage(goToInfoPage: true,hideLogout: true, appBarTitle: "Circles",));
                 // viewMyCircles(context);
               }),
           SizedBox(height: height,),

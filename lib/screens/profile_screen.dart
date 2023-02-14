@@ -10,6 +10,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'chat_core/rooms.dart';
 import 'chat_core/users.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -119,15 +120,29 @@ class ProfileScreen extends StatelessWidget {
                         height: 20,
                       ),
 
-                      ElevatedButton(
-                          child: const Text("My Friends",
-                              textAlign: TextAlign.center),
-                          onPressed: () {
-                            Get.to(const UsersPage(
-                              onlyUsers: true,
-                              friendsOnly: true,
-                            ));
-                          }),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          ElevatedButton(
+                              child: const Text("My Friends",
+                                  textAlign: TextAlign.center),
+                              onPressed: () {
+                                Get.to(const UsersPage(
+                                  onlyUsers: true,
+                                  friendsOnly: true,
+                                ));
+                              }),
+                          ElevatedButton(
+                              child: const Text("My Circles",
+                                  textAlign: TextAlign.center),
+                              onPressed: () {
+                                Get.to(const RoomsPage(goToInfoPage: true,hideLogout: true, appBarTitle: "Circles",));
+                              }),
+
+                        ],
+                      ),
+
+
 
                       const SizedBox(
                         height: 30,

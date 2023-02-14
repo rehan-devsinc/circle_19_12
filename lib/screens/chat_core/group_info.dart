@@ -214,7 +214,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                   fontWeight: FontWeight.bold, fontSize: 25)),
                           const SizedBox(height: 15),
                           SizedBox(
-                            height: 100,
+                            height: 70,
                             child: TextFormField(
                               // initialValue: "",
                               controller: groupDesController,
@@ -224,6 +224,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                 }
                                 return null;
                               },
+                              textInputAction: TextInputAction.done,
                               decoration: const InputDecoration(
                                   label: Text(
                                     "Circle Description",
@@ -288,46 +289,50 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                               ],
                             )),
                       ),
+                    5.verticalSpace,
 
 
 
 
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 16),
-                      decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(5)),
-                      child: Row(
-                        children: [
-                          Expanded(child: Text(circleLink)),
-                          // InkWell(
-                          //   onTap: () {
-                          //     Clipboard.setData(
-                          //         ClipboardData(text: widget.groupRoom.id));
-                          //     Get.snackbar("Success", "Text Copied");
-                          //   },
-                          //   child: const Icon(Icons.copy),
-                          // ),
-                        ],
-                      ),
+                    true ? SizedBox() :
+
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 16),
+                          decoration: BoxDecoration(
+                              color: Colors.grey.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(5)),
+                          child: Row(
+                            children: [
+                              Expanded(child: Text(circleLink)),
+                              // InkWell(
+                              //   onTap: () {
+                              //     Clipboard.setData(
+                              //         ClipboardData(text: widget.groupRoom.id));
+                              //     Get.snackbar("Success", "Text Copied");
+                              //   },
+                              //   child: const Icon(Icons.copy),
+                              // ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 05,
+                        ),
+
+                        ElevatedButton(
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: circleLink));
+                              Get.snackbar("Success", "Link Copied",
+                                  backgroundColor: Colors.white);
+                            },
+                            child: const Text("Copy Invite Link")),
+                      ],
                     ),
-                    const SizedBox(
-                      height: 05,
-                    ),
 
-                    ElevatedButton(
-                        onPressed: () {
-                          Clipboard.setData(ClipboardData(text: circleLink));
-                          Get.snackbar("Success", "Link Copied",
-                              backgroundColor: Colors.white);
-                        },
-                        child: const Text("Copy Invite Link")),
-
-                    MuteButton(groupRoom: widget.groupRoom),
-                    const SizedBox(
-                      height: 10,
-                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -373,9 +378,9 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                               )
                       ],
                     ),
-                    const SizedBox(
-                      height: 00,
-                    ),
+
+
+
                     Row(
                       children: [
                     isManager
@@ -577,15 +582,15 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                                   Get.to(CalendarListEventsScreen(
                                       circleId: widget.groupRoom.id));
                                 },
-                                child: Text("View Circle Events")))
+                                child: Text("View Circle Events",textAlign: TextAlign.center,)))
                       ],
                     ),
+                    10.verticalSpace,
+                    MuteButton(groupRoom: widget.groupRoom),
                     const SizedBox(
                       height: 10,
                     ),
-                    const SizedBox(
-                      height: 5,
-                    ),
+
                     Row(
                       children: [
                         Expanded(

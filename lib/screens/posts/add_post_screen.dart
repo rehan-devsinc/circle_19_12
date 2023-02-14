@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:circle/screens/posts/news_feed_screen.dart';
+import 'package:circle/userinfo.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -7,6 +8,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:circle/models/post_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -50,8 +52,13 @@ class _AddPostScreenState extends State<AddPostScreen> {
             padding:  EdgeInsets.symmetric(vertical: 7.h,horizontal: 10.w),
             child: ElevatedButton(
                 onPressed: () async{
-                  await uploadPost();
-                },
+                  if(textEditingController.text.isEmpty && pickedFiles.isEmpty ){
+                    Get.snackbar("Request Failed", "Post can't be empty");
+                  }
+                  else {
+                      await uploadPost();
+                    }
+                  },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pink,
                 ),
@@ -136,6 +143,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     setState(() {});
 
     await FirebaseFirestore.instance.collection("posts").doc(uid).set(post.toJson());
+    await sendMessage(post);
 
     loadingText = null;
 
@@ -145,6 +153,30 @@ class _AddPostScreenState extends State<AddPostScreen> {
     else {
       Get.back();
     }
+  }
+
+  Future<void> sendMessage(PostModel postModel)async {
+
+    String text = "";
+
+    if(postModel.picturesList.isNotEmpty && (postModel.text==null || postModel.text!.isEmpty)){
+      String photos = postModel.picturesList.length > 1 ? "photos" : "photo";
+      text = "${(await CurrentUserInfo.getCurrentUserMap())['firstName']} posted ${postModel.picturesList.length} new $photos\n\nTap here to view the post.";
+    }
+    else if(postModel.picturesList.isEmpty && postModel.text!=null && postModel.text!.isNotEmpty){
+      text = '${(await CurrentUserInfo.getCurrentUserMap())['firstName']} added a new post!\n\n"${postModel.text}"\n\nTap here to view the post.';
+    }
+    else if(postModel.picturesList.isNotEmpty && postModel.text!=null && postModel.text!.isNotEmpty){
+      String photos = postModel.picturesList.length > 1 ? "photos" : "photo";
+      text = '${(await CurrentUserInfo.getCurrentUserMap())['firstName']} posted ${postModel.picturesList.length} new $photos with caption:\n\n"${postModel.text}"\n\nTap here to view the post.';
+    }
+
+    types.PartialText message = types.PartialText(text: text,metadata: {'post':postModel.toJson()});
+
+     FirebaseChatCore.instance.sendMessage(
+      message,
+      widget.groupRoom.id,
+    );
   }
 
   Future<String> uploadImageAndGetUrl(XFile pickedFile) async {

@@ -83,8 +83,8 @@ class NewsFeedScreen extends StatelessWidget {
                           );
                         }
 
-                        return _buildPostWidget(
-                            snapshot.data!.data()!, posts[index],listItemIndex: index,userId: posts[index].authorId );
+                        return buildPostWidget(
+                            snapshot.data!.data()!, posts[index],listItemIndex: index,userId: posts[index].authorId,newsFeedController: newsFeedController );
                       });
                 });
           }),
@@ -97,74 +97,77 @@ class NewsFeedScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPostWidget(Map<String, dynamic> userMap, PostModel post,{required int listItemIndex, required String userId}) {
-    return Padding(
-      padding:  EdgeInsets.only(bottom: 12.h),
-      child: Material(
-        elevation: 0,
-        // color: Colors.green,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 0.w, vertical: 0.h),
-          child: Column(
+}
 
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                  padding:  EdgeInsets.only(left: 12.w, right: 12.w ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        InkWell(
-                          onTap: (){
-                            if(userId == FirebaseAuth.instance.currentUser!.uid){
-                              Get.to(()=>ProfileScreen());
-                            }
-                            else {
-                              Get.to(() => OtherUserProfileScreen(
-                                otherUser: getUserFromMap(userMap,userId),
-                              ));
-                            }
+Widget buildPostWidget(Map<String, dynamic> userMap, PostModel post,{required int listItemIndex, required String userId, required NewsFeedController newsFeedController}) {
 
-                          },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CircleAvatar(
-                                backgroundImage: NetworkImage(userMap['imageUrl']),
-                                radius: 20.r,
-                              ),
-                              10.horizontalSpace,
-                              Padding(
-                                padding: EdgeInsets.only(bottom: 5.h),
-                                child: Text(userMap['firstName'] + " " + userMap['lastName'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),),
-                              ),
-                            ],
-                          ),
+  return Padding(
+    padding:  EdgeInsets.only(bottom: 12.h),
+    child: Material(
+      elevation: 0,
+      // color: Colors.green,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 0.w, vertical: 0.h),
+        child: Column(
+
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding:  EdgeInsets.only(left: 12.w, right: 12.w ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      InkWell(
+                        onTap: (){
+                          if(userId == FirebaseAuth.instance.currentUser!.uid){
+                            Get.to(()=>ProfileScreen());
+                          }
+                          else {
+                            Get.to(() => OtherUserProfileScreen(
+                              otherUser: getUserFromMap(userMap,userId),
+                            ));
+                          }
+
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircleAvatar(
+                              backgroundImage: NetworkImage(userMap['imageUrl']),
+                              radius: 20.r,
+                            ),
+                            10.horizontalSpace,
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 5.h),
+                              child: Text(userMap['firstName'] + " " + userMap['lastName'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),),
+                            ),
+                          ],
                         ),
-                        const Spacer(),
-                        Text(timeago.format(post.createdAt),style: TextStyle(fontSize: 12.sp),),
+                      ),
+                      const Spacer(),
+                      Text(timeago.format(post.createdAt),style: TextStyle(fontSize: 12.sp),),
 
-                      ],
-                    ),
-                    (post.text!=null && post.text!.isNotEmpty) ? Padding(
+                    ],
+                  ),
+                  (post.text!=null && post.text!.isNotEmpty) ? Padding(
 
-                      padding:  EdgeInsets.only(top: 12.h, left: 4.w),
-                      child: Text(post.text!, style: TextStyle(fontSize: 18.sp),),
-                    ) : const SizedBox(),
+                    padding:  EdgeInsets.only(top: 12.h, left: 4.w),
+                    child: Text(post.text!, style: TextStyle(fontSize: 18.sp),),
+                  ) : const SizedBox(),
 
-                  ],
-                ),
+                ],
               ),
-              5.verticalSpace,
-              if(post.picturesList.isNotEmpty)
+            ),
+            5.verticalSpace,
+            if(post.picturesList.isNotEmpty)
               SizedBox(
                 height: 0.5.sh,
                 width: 1.sw,
                 child: PageView.builder(
-                  controller: PageController(initialPage: newsFeedController.currentIndexList[listItemIndex].value ),
+                    controller: PageController(initialPage: newsFeedController.currentIndexList[listItemIndex].value ),
                     onPageChanged: (index){
                       newsFeedController.modifyIndex(index,listItemIndex: listItemIndex);
                     },
@@ -191,26 +194,26 @@ class NewsFeedScreen extends StatelessWidget {
                       );
                     }),
               ),
-              10.verticalSpace,
+            10.verticalSpace,
 
-              // Icon(Icons.add_a_photo, size: 50,),
-              // Icon(Icons.add_a_photo, size: 50,),
-              // Icon(Icons.add_a_photo, size: 50,),
+            // Icon(Icons.add_a_photo, size: 50,),
+            // Icon(Icons.add_a_photo, size: 50,),
+            // Icon(Icons.add_a_photo, size: 50,),
 
 
-              if (post.picturesList.length > 1)
-               VariableDots(
-                 listItemIndex: listItemIndex,
-                    imagesCount: post.picturesList.length,
-                    newsFeedController: newsFeedController),
+            if (post.picturesList.length > 1)
+              VariableDots(
+                  listItemIndex: listItemIndex,
+                  imagesCount: post.picturesList.length,
+                  newsFeedController: newsFeedController),
 
-            ],
-          ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }
+
 
 class VariableDots extends StatelessWidget {
   const VariableDots(
