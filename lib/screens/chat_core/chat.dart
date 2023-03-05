@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:circle/models/post_model.dart';
 import 'package:circle/screens/chat_core/group_info.dart';
 import 'package:circle/screens/other_user_profile.dart';
+import 'package:circle/screens/posts/add_post_screen.dart';
 import 'package:circle/screens/posts/view_post_screen.dart';
 import 'package:circle/userinfo.dart';
 import 'package:circle/utils/db_operations.dart';
@@ -16,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_firebase_chat_core/flutter_firebase_chat_core.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -147,15 +149,26 @@ class _ChatPageState extends State<ChatPage> {
         centerTitle: true,
         actions: [
           (widget.room.type == (types.RoomType.group))
-              ? InkWell(
-                  onTap: () {
-                    Get.to(GroupInfoScreen(groupRoom: widget.room));
-                  },
-                  child: const Padding(
-                    padding: EdgeInsets.only(right: 12.0),
-                    child: Icon(Icons.info_outline, color: Colors.purple,),
-                  ),
-                )
+              ? Row(
+            mainAxisSize: MainAxisSize.min,
+                children: [
+                  InkWell(
+                      onTap: () {
+                        Get.to(GroupInfoScreen(groupRoom: widget.room));
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.only(right: 12.0),
+                        child: Icon(Icons.info_outline, color: Colors.purple,),
+                      ),
+                    ),
+                  InkWell(
+                      onTap: (){
+                        Get.to(()=>AddPostScreen(groupRoom: widget.room,goToPostsPage: true,));
+                      },
+                      child: const Icon(Icons.add_circle, color: Colors.green,)),
+                  10.horizontalSpace,
+                ],
+              )
               : MuteTextButton(room: widget.room)
           // PopupMenuButton<String>(
           //   icon: Icon(CupertinoIcons.ellipsis_vertical),

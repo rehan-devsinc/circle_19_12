@@ -129,7 +129,14 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                           Icons.message,
                           color: Colors.white,
                         )),
-                  )
+                  ),
+                  10.horizontalSpace,
+                  InkWell(
+                      onTap: (){
+                        Get.to(()=>AddPostScreen(groupRoom: widget.groupRoom,goToPostsPage: true,));
+                      },
+                      child: const Icon(Icons.add_box_sharp, color: Colors.green,)),
+                  10.horizontalSpace
                 ],
               ),
               body: Padding(
@@ -256,7 +263,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                             Get.to(()=>NewsFeedScreen(groupRoom: widget.groupRoom,));
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.pink,
+                            backgroundColor: Colors.green,
                             fixedSize: Size.fromHeight(50.r)
                           ),
                           child: Row(
@@ -265,7 +272,7 @@ class _GroupInfoScreenState extends State<GroupInfoScreen> {
                             children: [
                               const Icon(Icons.photo),
                               SizedBox(width: 20.w,),
-                              const Text("View Circle Feed"),
+                              const Text("View Circle Posts"),
                             ],
                           )),
                     if(!isChildCircle)
