@@ -325,6 +325,7 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildSingleFavouriteItem(String item, BuildContext context,
       FavouritesCategory category, List<String> favorites,
       {bool deleteIcon = true,void Function()? onTap}) {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../chat_core/users.dart';
-import '../contacts_screen.dart';
 import '../profile_screen.dart';
 
 

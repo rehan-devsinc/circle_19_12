@@ -7,16 +7,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 class SelectCircleForPosts extends StatelessWidget {
-  const SelectCircleForPosts({Key? key,  this.toViewPosts = true}) : super(key: key);
+  const SelectCircleForPosts({Key? key}) : super(key: key);
 
   ///otherwise to create posts
-  final bool toViewPosts;
 
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
       appBar: AppBar(
-        title: Text("Select Circle"),
+        title: const Text("Select Circle"),
       ),
       body: Padding(
         padding:  EdgeInsets.only(right: 16.w),
@@ -26,7 +25,7 @@ class SelectCircleForPosts extends StatelessWidget {
             15.verticalSpace,
             Padding(
               padding:  EdgeInsets.only(left: 20.w),
-              child: Text( toViewPosts ? "Select a circle to view its Posts" : "Select a circle to add new Post",
+              child: Text( "Select a circle to view or add a new a post" ,
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold
@@ -96,7 +95,7 @@ class SelectCircleForPosts extends StatelessWidget {
                                     Text(
                                       room.name ?? 'no name',
                                       style: TextStyle(
-                                          fontSize: 14.sp,
+                                          fontSize: 16.sp,
                                           fontWeight: FontWeight.bold),
                                     ),
                                     const SizedBox(
@@ -105,15 +104,21 @@ class SelectCircleForPosts extends StatelessWidget {
                                   ],
                                 ),
                               ),
+                              10.horizontalSpace,
                               ElevatedButton(onPressed: (){
-                                if(toViewPosts){
-                                  Get.to(()=>NewsFeedScreen(groupRoom: room));
-                                }
-                                else{
-                                  Get.to(()=>AddPostScreen(groupRoom: room,goToPostsPage : true));
+                                Get.to(()=>NewsFeedScreen(groupRoom: room));
+                              }, child: const Text("View")
 
-                                }
-                              }, child: Text(toViewPosts ? "View" : "Add Post")
+                              ),
+                              15.horizontalSpace,
+
+                              ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green
+                                  ),
+                                  onPressed: (){
+                                  Get.to(()=>AddPostScreen(groupRoom: room,goToPostsPage : true));
+                                  }, child: const Text( "Add")
 
                               )
                             ],
@@ -123,7 +128,7 @@ class SelectCircleForPosts extends StatelessWidget {
                     ),
                   );
                 }
-                return SizedBox();
+                return const SizedBox();
               },
             );
           },

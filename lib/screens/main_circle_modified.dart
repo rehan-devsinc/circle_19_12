@@ -2,7 +2,9 @@ import 'package:circle/controllers/tags_matching_controller.dart';
 import 'package:circle/logoutController.dart';
 import 'package:circle/phone_login/phone_login.dart';
 import 'package:circle/screens/buttons_screens/circle_buttons_screens.dart';
+import 'package:circle/screens/buttons_screens/drawing_buttons.dart';
 import 'package:circle/screens/buttons_screens/event_buttons_screens.dart';
+import 'package:circle/screens/buttons_screens/games_buttons_screen.dart';
 import 'package:circle/screens/chat_core/search_chat_screen.dart';
 import 'package:circle/screens/chat_core/search_users.dart';
 import 'package:circle/screens/chat_core/users.dart';
@@ -433,6 +435,23 @@ class MainCircleState extends State<MainCircle> {
                                     shape: const CircleBorder(),
                                   ),
                                 ),
+
+                                Padding(
+                                  padding: EdgeInsets.only(bottom: 50.h),
+                                  child: ElevatedButton(
+                                      child:  Text("Drawing",style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold,),),
+                                      onPressed: () {
+                                        Get.to(()=>DrawingButtonsScreen());
+
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        fixedSize: const Size(100, 80),
+                                        shape: const CircleBorder(),
+                                        backgroundColor: Colors.cyan
+                                      )),
+                                ),
+
+
                                 ElevatedButton(
                                   child: const Text("TEXT"),
                                   onPressed: () {
@@ -448,7 +467,7 @@ class MainCircleState extends State<MainCircle> {
                               ],
                             ),
                             const SizedBox(
-                              height: 30,
+                              height: 0,
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -499,7 +518,7 @@ class MainCircleState extends State<MainCircle> {
                               ],
                             ),
                             SizedBox(
-                              height: 30,
+                              height: 20,
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -515,12 +534,13 @@ class MainCircleState extends State<MainCircle> {
                                       fixedSize: Size(100, 80),
                                       shape: CircleBorder(),
                                     )),
+
                                 ElevatedButton(
 
                                     ///VIEW CIRCLE INVITES REPLACEMENT
-                                    child:  Text("ADD POST",style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.cyanAccent),),
+                                    child:  Text("GAMES",style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.greenAccent),),
                                     onPressed: () {
-                                      Get.to(()=>const SelectCircleForPosts(toViewPosts: false,));
+                                      Get.to(()=>GamesButtonsScreen());
 
                                     },
                                     style: ElevatedButton.styleFrom(
