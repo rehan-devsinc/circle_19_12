@@ -11,31 +11,25 @@ class GameWebViewScreen extends StatefulWidget {
 }
 
 class _GameWebViewScreenState extends State<GameWebViewScreen> {
-
   late WebViewController controller;
 
   bool loading = true;
 
   @override
   void initState() {
-
     initiateController();
 
     // TODO: implement initState
     super.initState();
   }
 
-  Future initiateController() async{
-
+  Future initiateController() async {
     print("heello");
     String js =
         "document.querySelector('meta[name=\"viewport\"]').setAttribute('content', 'width=1024px, initial-scale=' + (document.documentElement.clientWidth / 1024));";
 
     controller = WebViewController()
-    ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..addJavaScriptChannel("dummy", onMessageReceived: (JavaScriptMessage msg){
-        print("js channel message: $msg");
-      })
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
@@ -44,7 +38,7 @@ class _GameWebViewScreenState extends State<GameWebViewScreen> {
           onPageStarted: (String url) {},
           onPageFinished: (String url) {},
           onWebResourceError: (WebResourceError error) {
-            Get.snackbar("Error ${error.errorCode}",error.description);
+            Get.snackbar("Error ${error.errorCode}", error.description);
             Get.back();
           },
           // onNavigationRequest: (NavigationRequest request) {
@@ -56,16 +50,10 @@ class _GameWebViewScreenState extends State<GameWebViewScreen> {
         ),
       );
 
-    await controller.runJavaScript(js);
     await controller.loadRequest(Uri.parse(widget.url));
     loading = false;
-    setState(() {
-
-    });
-
+    setState(() {});
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -74,9 +62,13 @@ class _GameWebViewScreenState extends State<GameWebViewScreen> {
         automaticallyImplyLeading: true,
         backgroundColor: Color(0xFF091d59),
         elevation: 0,
-        toolbarHeight: kToolbarHeight-20,
+        toolbarHeight: kToolbarHeight - 20,
       ),
-      body: loading? const Center(child: CircularProgressIndicator()) : WebViewWidget(controller: controller,),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : WebViewWidget(
+              controller: controller,
+            ),
     );
   }
 }

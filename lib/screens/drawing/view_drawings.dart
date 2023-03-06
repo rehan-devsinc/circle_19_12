@@ -16,41 +16,44 @@ class MyDrawingsList extends StatelessWidget {
         title: Text("My Drawings"),
       ),
       body: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).snapshots(),
-          builder: (context,AsyncSnapshot<DocumentSnapshot<Map<String,dynamic>>> snapshot){
-            if(snapshot.connectionState==ConnectionState.waiting || (!(snapshot.hasData))){
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(FirebaseAuth.instance.currentUser!.uid)
+              .snapshots(),
+          builder: (context,
+              AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting ||
+                (!(snapshot.hasData))) {
               return const Center(
                 child: CircularProgressIndicator(),
               );
             }
 
-
             Map userMap = snapshot.data!.data()!;
             Map metadata = userMap['metadata'] ?? {};
             List drawingUrls = metadata['drawingUrls'] ?? [];
 
-            drawingUrls.clear();
-
-            if(drawingUrls.isEmpty){
+            if (drawingUrls.isEmpty) {
               return const Center(
                 child: Text("No Drawings to Show :)"),
               );
             }
 
             return ListView.builder(
-              itemCount: drawingUrls.length,
-                itemBuilder: (context,index){
-              return Padding(
-                padding:  EdgeInsets.symmetric(vertical: 10.h,horizontal: 20.w),
-                child: Image.network(drawingUrls[drawingUrls.length - index -1 ]),
-              );
-            });
-
+                itemCount: drawingUrls.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 10.h, horizontal: 20.w),
+                    child: Image.network(
+                        drawingUrls[drawingUrls.length - index - 1]),
+                  );
+                });
           }),
       floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
-          onPressed: (){
-            Get.to(()=>NewDrawingScreen());
+          onPressed: () {
+            Get.to(() => NewDrawingScreen());
           }),
     );
   }
